@@ -43,7 +43,6 @@ export function MenuOverlay({
   }
 
   const carouselSlots = useMemo(() => {
-    const count = sections.length;
     return Array.from({ length: CAROUSEL_RADIUS * 2 + 1 }, (_, slotIndex) => {
       const offset = slotIndex - CAROUSEL_RADIUS;
       const sectionIndex = normalizePortfolioSectionIndex(activeIndex + offset);
@@ -65,7 +64,11 @@ export function MenuOverlay({
       ref={menuRef}
     >
       <div className="menuRailWrap">
-        <nav className="menuRail" aria-label="Secciones del portfolio">
+        <nav
+          className="menuRail"
+          aria-label="Secciones del portfolio"
+          aria-describedby="menu-controls-hint"
+        >
           {carouselSlots.map(({ offset, sectionIndex, section }) => {
             const isSelected = offset === 0;
             const distance = Math.abs(offset);
@@ -89,14 +92,15 @@ export function MenuOverlay({
                   } as CSSProperties
                 }
                 onClick={() => onSelectSection(sectionIndex)}
-                onMouseEnter={() => onSelectSection(sectionIndex)}
-                onFocus={() => onSelectSection(sectionIndex)}
               >
                 {section.label}
               </button>
             );
           })}
         </nav>
+        <p id="menu-controls-hint" className="menuControlsHint" data-menu-in>
+          ↑↓ ←→ · WASD · rueda
+        </p>
       </div>
 
       <div className="menuStage">

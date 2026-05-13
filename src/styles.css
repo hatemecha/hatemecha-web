@@ -350,8 +350,9 @@ img {
   position: relative;
   z-index: 2;
   display: grid;
+  grid-template-rows: 1fr auto;
   min-height: 100svh;
-  align-items: center;
+  align-items: stretch;
   border-right: 1px solid rgb(var(--accent-rgb) / 0.5);
   background: var(--ink);
 }
@@ -367,6 +368,7 @@ img {
 .menuRail {
   position: relative;
   z-index: 1;
+  align-self: center;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -374,6 +376,7 @@ img {
   gap: 6px;
   width: 100%;
   max-height: min(78svh, 640px);
+  margin-inline: auto;
   padding: clamp(28px, 5vh, 72px) clamp(10px, 1.8vw, 22px);
   overflow: hidden;
   mask-image: linear-gradient(
@@ -448,6 +451,25 @@ img {
   transform: scale(var(--carousel-scale));
 }
 
+.menuControlsHint {
+  justify-self: center;
+  width: 100%;
+  max-width: calc(var(--rail-width) - 10px);
+  margin: 0 clamp(5px, 1vw, 10px) clamp(12px, 2vh, 22px);
+  padding: 0.35em 0.2em;
+  border: none;
+  background: transparent;
+  color: oklch(72% 0.02 95 / 0.38);
+  font-family: var(--font-mono);
+  font-size: clamp(8px, 0.85vw, 10px);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  line-height: 1.4;
+  text-align: center;
+  text-transform: uppercase;
+  box-shadow: none;
+}
+
 .menuStage {
   position: relative;
   display: grid;
@@ -488,16 +510,16 @@ img {
 
 .menuPanel {
   position: relative;
-  z-index: 3;
+  z-index: 4;
   width: min(55vw, 620px);
   margin-left: min(6vw, 86px);
 }
 
 .menuKicker {
   display: inline-flex;
-  gap: 10px;
+  gap: 14px;
   align-items: center;
-  margin: 0 0 14px;
+  margin: 0 0 clamp(20px, 2.4vw, 28px);
   color: var(--accent);
   font-family: var(--font-mono);
   font-size: clamp(12px, 1vw, 15px);
@@ -508,8 +530,9 @@ img {
 
 .menuKicker::before {
   content: "";
+  flex-shrink: 0;
   width: 42px;
-  height: 2px;
+  height: 4px;
   background: currentColor;
 }
 
@@ -517,7 +540,8 @@ img {
   width: max-content;
   max-width: 100%;
   margin: 0;
-  border-bottom: 2px solid var(--accent);
+  padding-bottom: 0.06em;
+  border-bottom: 4px solid var(--accent);
   color: var(--fg);
   font-family: var(--font-display);
   font-size: clamp(52px, 6.4vw, 118px);
@@ -570,6 +594,7 @@ img {
 .floatingImages {
   position: absolute;
   inset: 0;
+  left: min(72%, max(300px, 58%));
   z-index: 2;
   pointer-events: none;
 }
@@ -578,88 +603,90 @@ img {
   position: absolute;
   border: 0;
   background: transparent;
-  object-fit: cover;
-  opacity: 0.82;
-  filter: grayscale(0.12) contrast(1.04) saturate(0.92);
-  transition:
-    transform 660ms cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 240ms ease,
-    filter 240ms ease;
-  animation: photoDrift 8s ease-in-out infinite alternate;
-  will-change: transform;
+  object-fit: contain;
+  opacity: 0.62;
+  filter: grayscale(1) contrast(1.12) brightness(1.02);
+  transition: transform 720ms cubic-bezier(0.16, 1, 0.3, 1), opacity 280ms ease;
+  animation: menuPhotoBreath 7.5s ease-in-out infinite alternate;
+  will-change: transform, opacity;
 }
 
 .floatingImageStrip {
-  top: clamp(66px, 10vh, 116px);
-  right: clamp(34px, 7vw, 120px);
-  width: clamp(220px, 31vw, 510px);
-  aspect-ratio: 28 / 9;
+  top: clamp(56px, 10vh, 112px);
+  right: clamp(12px, 2.5vw, 48px);
+  left: auto;
+  width: min(42vw, 380px);
+  max-height: min(26vh, 220px);
+  height: auto;
+  object-position: 100% 0;
 }
 
 .floatingImageBlock {
-  left: clamp(24px, 24vw, 390px);
-  bottom: clamp(48px, 10vh, 128px);
-  width: clamp(134px, 17vw, 236px);
-  aspect-ratio: 1;
-  animation-delay: -2s;
+  right: clamp(16px, 3vw, 56px);
+  left: auto;
+  bottom: clamp(28px, 9vh, 120px);
+  width: min(24vw, 200px);
+  max-height: min(30vh, 260px);
+  height: auto;
+  object-position: 100% 100%;
+  animation-delay: -2.6s;
 }
 
 .floatingImages[data-active-image-set="home"] .floatingImageStrip {
-  transform: translate3d(0, 0, 0) rotate(-1deg);
+  transform: translate3d(0, -1vh, 0) rotate(-1.5deg);
 }
 
 .floatingImages[data-active-image-set="home"] .floatingImageBlock {
-  transform: translate3d(0, 0, 0) rotate(1deg);
+  transform: translate3d(0, 2vh, 0) rotate(2deg);
 }
 
 .floatingImages[data-active-image-set="proyectos"] .floatingImageStrip {
-  transform: translate3d(-3vw, 2vh, 0) rotate(1deg);
+  transform: translate3d(-2vw, 3vh, 0) rotate(2deg);
 }
 
 .floatingImages[data-active-image-set="proyectos"] .floatingImageBlock {
-  transform: translate3d(4vw, -2vh, 0) rotate(-2deg);
+  transform: translate3d(2vw, -3vh, 0) rotate(-2.5deg);
 }
 
 .floatingImages[data-active-image-set="cv-skills"] .floatingImageStrip {
-  transform: translate3d(-2vw, 5vh, 0) rotate(-1deg);
+  transform: translate3d(1vw, 5vh, 0) rotate(-2deg);
 }
 
 .floatingImages[data-active-image-set="cv-skills"] .floatingImageBlock {
-  transform: translate3d(6vw, -5vh, 0) rotate(2deg);
+  transform: translate3d(-1vw, -4vh, 0) rotate(2.5deg);
 }
 
 .floatingImages[data-active-image-set="galeria"] .floatingImageStrip {
-  transform: translate3d(-6vw, 1vh, 0) rotate(2deg);
+  transform: translate3d(-3vw, 1vh, 0) rotate(2.5deg);
 }
 
 .floatingImages[data-active-image-set="galeria"] .floatingImageBlock {
-  transform: translate3d(2vw, -6vh, 0) rotate(-1deg);
+  transform: translate3d(2vw, 4vh, 0) rotate(-2deg);
 }
 
 .floatingImages[data-active-image-set="musica"] .floatingImageStrip {
-  transform: translate3d(1vw, 6vh, 0) rotate(1deg);
+  transform: translate3d(2vw, 4vh, 0) rotate(-1.5deg);
 }
 
 .floatingImages[data-active-image-set="musica"] .floatingImageBlock {
-  transform: translate3d(5vw, 1vh, 0) rotate(-2deg);
+  transform: translate3d(-2vw, -2vh, 0) rotate(2deg);
 }
 
 .floatingImages[data-active-image-set="acerca"] .floatingImageStrip {
-  transform: translate3d(-4vw, 3vh, 0) rotate(-2deg);
+  transform: translate3d(-1vw, 6vh, 0) rotate(-2.5deg);
 }
 
 .floatingImages[data-active-image-set="acerca"] .floatingImageBlock {
-  transform: translate3d(3vw, -3vh, 0) rotate(2deg);
+  transform: translate3d(1vw, -1vh, 0) rotate(-2deg);
 }
 
-@keyframes photoDrift {
+@keyframes menuPhotoBreath {
   from {
-    opacity: 0.76;
-    filter: grayscale(0.18) contrast(1.02) saturate(0.88);
+    opacity: 0.52;
   }
+
   to {
-    opacity: 0.88;
-    filter: grayscale(0.08) contrast(1.08) saturate(0.96);
+    opacity: 0.68;
   }
 }
 
@@ -727,18 +754,80 @@ img {
     font-size: clamp(13px, 3.2vw, 17px);
   }
 
+  .menuControlsHint {
+    margin: 0 4px 10px;
+    max-width: calc(100% - 8px);
+    font-size: clamp(7px, 2vw, 9px);
+    letter-spacing: 0.1em;
+    color: oklch(72% 0.02 95 / 0.34);
+  }
+
+  .floatingImages {
+    left: 0;
+    top: 40%;
+  }
+
   .floatingImageStrip {
     top: auto;
-    right: 14px;
-    bottom: 42px;
-    width: min(45vw, 210px);
+    right: 10px;
+    bottom: 108px;
+    width: min(44vw, 180px);
+    max-height: min(20vh, 140px);
   }
 
   .floatingImageBlock {
-    left: auto;
-    right: 22px;
-    bottom: 96px;
-    width: min(30vw, 132px);
+    right: 8px;
+    bottom: 36px;
+    width: min(32vw, 128px);
+    max-height: min(24vh, 160px);
+  }
+
+  .floatingImages[data-active-image-set="home"] .floatingImageStrip {
+    transform: translate3d(0, 0, 0) rotate(-1deg);
+  }
+
+  .floatingImages[data-active-image-set="home"] .floatingImageBlock {
+    transform: translate3d(0, 1vh, 0) rotate(1.5deg);
+  }
+
+  .floatingImages[data-active-image-set="proyectos"] .floatingImageStrip {
+    transform: translate3d(-1vw, 2vh, 0) rotate(1.5deg);
+  }
+
+  .floatingImages[data-active-image-set="proyectos"] .floatingImageBlock {
+    transform: translate3d(1vw, -2vh, 0) rotate(-2deg);
+  }
+
+  .floatingImages[data-active-image-set="cv-skills"] .floatingImageStrip {
+    transform: translate3d(1vw, 3vh, 0) rotate(-1.5deg);
+  }
+
+  .floatingImages[data-active-image-set="cv-skills"] .floatingImageBlock {
+    transform: translate3d(-1vw, -2vh, 0) rotate(2deg);
+  }
+
+  .floatingImages[data-active-image-set="galeria"] .floatingImageStrip {
+    transform: translate3d(-2vw, 1vh, 0) rotate(2deg);
+  }
+
+  .floatingImages[data-active-image-set="galeria"] .floatingImageBlock {
+    transform: translate3d(1vw, 2vh, 0) rotate(-1.5deg);
+  }
+
+  .floatingImages[data-active-image-set="musica"] .floatingImageStrip {
+    transform: translate3d(1vw, 2vh, 0) rotate(-1deg);
+  }
+
+  .floatingImages[data-active-image-set="musica"] .floatingImageBlock {
+    transform: translate3d(-1vw, -2vh, 0) rotate(1.5deg);
+  }
+
+  .floatingImages[data-active-image-set="acerca"] .floatingImageStrip {
+    transform: translate3d(-1vw, 3vh, 0) rotate(-2deg);
+  }
+
+  .floatingImages[data-active-image-set="acerca"] .floatingImageBlock {
+    transform: translate3d(1vw, 0, 0) rotate(-1.5deg);
   }
 }
 
