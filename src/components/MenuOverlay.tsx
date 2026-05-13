@@ -1,0 +1,132 @@
+import type { CSSProperties, RefObject } from "react";
+import { useMemo } from "react";
+import { normalizePortfolioSectionIndex, type PortfolioSection } from "../data/portfolioSections";
+import { FloatingImages } from "./FloatingImages";
+
+const CAROUSEL_RADIUS = 4;
+
+function carouselOpacity(distance: number) {
+  const d = Math.abs(distance);
+  if (d === 0) return 1;
+  if (d === 1) return 0.34;
+  if (d === 2) return 0.18;
+  if (d === 3) return 0.085;
+  return 0.035;
+}
+
+function carouselScale(distance: number) {
+  const s = 1 - Math.abs(distance) * 0.042;
+  return Math.max(0.82, s);
+}
+
+type MenuOverlayProps = {
+  menuRef: RefObject<HTMLElement | null>;
+  sections: readonly PortfolioSection[];
+  activeIndex: number;
+  isOpen: boolean;
+  onSelectSection: (index: number) => void;
+  onCloseMenu: () => void;
+};
+
+export function MenuOverlay({
+  menuRef,
+  sections,
+  activeIndex,
+  isOpen,
+  onSelectSection,
+  onCloseMenu
+}: MenuOverlayProps) {
+  const activeSection = sections[activeIndex];
+
+  if (!activeSection) {
+    throw new Error(`Invalid active portfolio section index: ${activeIndex}`);
+  }
+
+  const carouselSlots = useMemo(() => {
+    const count = sections.length;
+    return Array.from({ length: CAROUSEL_RADIUS * 2 + 1 }, (_, slotIndex) => {
+      const offset = slotIndex - CAROUSEL_RADIUS;
+      const sectionIndex = normalizePortfolioSectionIndex(activeIndex + offset);
+      return {
+        offset,
+        sectionIndex,
+        section: sections[sectionIndex]!
+      };
+    });
+  }, [activeIndex, sections]);
+
+  return (
+    <section
+      className="fullscreenMenu"
+      data-open={isOpen}
+      data-active={activeSection.id}
+      aria-label="Menu fullscreen"
+      aria-hidden={!isOpen}
+      ref={menuRef}
+    >
+      <div className="menuRailWrap">
+        <nav className="menuRail" aria-label="Secciones del portfolio">
+          {carouselSlots.map(({ offset, sectionIndex, section }) => {
+            const isSelected = offset === 0;
+            const distance = Math.abs(offset);
+            const opacity = carouselOpacity(offset);
+            const scale = carouselScale(offset);
+
+            return (
+              <button
+                className="menuRailItem"
+                type="button"
+                key={`slot-${offset}`}
+                aria-current={isSelected ? "page" : undefined}
+                aria-selected={isSelected}
+                tabIndex={isSelected ? 0 : -1}
+                data-distance={distance}
+                data-menu-in
+                style={
+                  {
+                    opacity,
+                    "--carousel-scale": String(scale)
+                  } as CSSProperties
+                }
+                onClick={() => onSelectSection(sectionIndex)}
+                onMouseEnter={() => onSelectSection(sectionIndex)}
+                onFocus={() => onSelectSection(sectionIndex)}
+              >
+                {section.label}
+              </button>
+            );
+          })}
+        </nav>
+      </div>
+
+      <div className="menuStage">
+        <button className="menuClose" type="button" onClick={onCloseMenu} aria-label="Cerrar menú">
+          x
+        </button>
+
+        <article className="menuPanel" aria-live="polite">
+          <p className="menuKicker" data-menu-in>
+            {activeSection.label}
+          </p>
+          <h2 className="menuTitle" data-menu-in>
+            {activeSection.label}
+          </h2>
+          <p className="menuCopy" data-menu-in>
+            {activeSection.copy}
+          </p>
+          <button
+            className="enterButton"
+            type="button"
+            aria-label={`Entrar en ${activeSection.label}`}
+            onClick={onCloseMenu}
+            data-menu-in
+          >
+            enter
+          </button>
+        </article>
+
+        <FloatingImages activeId={activeSection.id} />
+      </div>
+    </section>
+  );
+}
