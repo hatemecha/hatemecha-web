@@ -5,7 +5,9 @@ const SCRAMBLE_GLYPHS = "アイウエオカキクケコサシスセソタチツ�
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 
 type ScrambleTextProps = Omit<ComponentPropsWithoutRef<"p">, "children"> & {
+  active?: boolean;
   delay?: number;
+  replayKey?: string | number;
   text: string;
 };
 
@@ -30,12 +32,18 @@ function buildScrambledText(text: string, revealedCount: number, frame: number) 
   return nextText;
 }
 
-export function ScrambleText({ delay = 0, text, ...props }: ScrambleTextProps) {
+export function ScrambleText({ active = true, delay = 0, replayKey, text, ...props }: ScrambleTextProps) {
   const textRef = useRef<HTMLParagraphElement>(null);
 
   useEffect(() => {
     const textElement = textRef.current;
     if (!textElement) return undefined;
+
+    if (!active) {
+      textElement.textContent = text;
+      textElement.setAttribute("aria-label", text);
+      return undefined;
+    }
 
     if (window.matchMedia(REDUCED_MOTION_QUERY).matches) {
       textElement.textContent = text;
@@ -65,7 +73,7 @@ export function ScrambleText({ delay = 0, text, ...props }: ScrambleTextProps) {
       animation.revert();
       textElement.textContent = text;
     };
-  }, [delay, text]);
+  }, [active, delay, replayKey, text]);
 
   return (
     <p ref={textRef} {...props}>

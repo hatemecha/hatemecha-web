@@ -175,7 +175,6 @@ export function MenuOverlay({
                 aria-selected={isSelected}
                 tabIndex={isSelected ? 0 : -1}
                 data-distance={distance}
-                data-menu-in
                 style={
                   {
                     opacity,
@@ -193,7 +192,9 @@ export function MenuOverlay({
           id="menu-controls-hint"
           className="menuControlsHint"
           text="↑↓ ←→ · WASD · rueda"
+          active={isOpen}
           delay={220}
+          replayKey={`${activeSection.id}-${isOpen ? "open" : "closed"}`}
           data-menu-in
         />
       </div>
@@ -215,11 +216,25 @@ export function MenuOverlay({
             className="menuCodeSnippet menuCodeSnippetTop"
             aria-hidden="true"
           />
-          <ScrambleText className="menuKicker" text={activeSection.jaLabel} delay={120} data-menu-in />
+          <ScrambleText
+            className="menuKicker"
+            text={activeSection.jaLabel}
+            active={isOpen}
+            delay={120}
+            replayKey={`${activeSection.id}-${isOpen ? "open" : "closed"}`}
+            data-menu-in
+          />
           <h2 id={MENU_TITLE_ID} className="menuTitle" data-menu-in>
             {activeSection.label}
           </h2>
-          <ScrambleText className="menuCopy" text={activeSection.copy} delay={260} data-menu-in />
+          <ScrambleText
+            className="menuCopy"
+            text={activeSection.copy}
+            active={isOpen}
+            delay={260}
+            replayKey={`${activeSection.id}-${isOpen ? "open" : "closed"}`}
+            data-menu-in
+          />
           <button
             className="enterButton"
             type="button"

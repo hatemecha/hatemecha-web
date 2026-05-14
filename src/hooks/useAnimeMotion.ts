@@ -32,7 +32,7 @@ export function useAnimeMotion(isMenuOpen: boolean, menuMotionKey: number) {
     if (!menuElement || !isMenuOpen || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const targetSelector = openedNow
-      ? "[data-menu-in], .floatingImages"
+      ? "[data-menu-in]:not(.menuRailItem), .floatingImages"
       : ".menuPanel [data-menu-in], .floatingImages";
 
     const animation = animate(menuElement.querySelectorAll(targetSelector), {
