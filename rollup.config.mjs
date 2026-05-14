@@ -25,6 +25,32 @@ function ignoreCssImports() {
   };
 }
 
+function replaceRequired(source, pattern, replacement, description) {
+  const replaced = source.replace(pattern, replacement);
+
+  if (replaced === source) {
+    throw new Error(`Could not update production HTML: missing ${description}.`);
+  }
+
+  return replaced;
+}
+
+function buildProductionHtml(sourceHtml) {
+  const htmlWithEntryScript = replaceRequired(
+    sourceHtml,
+    /<script\b(?=[^>]*\btype=(["'])module\1)(?=[^>]*\bsrc=(["'])\/src\/main\.tsx\2)[^>]*>\s*<\/script>/,
+    '    <script type="module" src="/assets/app.js"></script>',
+    "source entry script"
+  );
+
+  return replaceRequired(
+    htmlWithEntryScript,
+    /<\/head>/i,
+    '    <link rel="stylesheet" href="/assets/app.css" />\n  </head>',
+    "closing head tag"
+  );
+}
+
 function copyStaticAssets() {
   return {
     name: "copy-static-assets",
@@ -42,12 +68,7 @@ function copyStaticAssets() {
       });
 
       const sourceHtml = await readFile(path.join(rootDirectory, "index.html"), "utf8");
-      const productionHtml = sourceHtml
-        .replace(
-          '    <script type="module" src="/src/main.tsx"></script>',
-          '    <script type="module" src="/assets/app.js"></script>'
-        )
-        .replace("  </head>", '    <link rel="stylesheet" href="/assets/app.css" />\n  </head>');
+      const productionHtml = buildProductionHtml(sourceHtml);
 
       await writeFile(path.join(distDirectory, "index.html"), productionHtml);
     }

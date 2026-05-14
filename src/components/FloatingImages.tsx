@@ -36,7 +36,7 @@ function getPhotoAspectRatio(width: number, height: number) {
 function buildWirePaths(rects: Rect[], stageW: number, stageH: number): string[] {
   if (rects.length === 0) return [];
 
-  const sortedRects = rects.toSorted((a, b) => a.y + a.h / 2 - (b.y + b.h / 2));
+  const sortedRects = rects.slice().sort((a, b) => a.y + a.h / 2 - (b.y + b.h / 2));
   const leftMostFrame = Math.min(...sortedRects.map((rect) => rect.x));
   const spineGap = clamp(stageW * 0.025, 18, 34);
   const safeLeft = stageW > 760 ? clamp(stageW * 0.5, 0, stageW - 10) : 10;

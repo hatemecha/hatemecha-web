@@ -1,11 +1,20 @@
 import type { CSSProperties, RefObject } from "react";
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useMenuPanelCodeTyping } from "../hooks/useMenuPanelCodeTyping";
 import { normalizePortfolioSectionIndex, type PortfolioSection } from "../data/portfolioSections";
 import { FloatingImages } from "./FloatingImages";
 
 const CAROUSEL_RADIUS = 4;
 const CAROUSEL_OPACITY_BY_DISTANCE = [1, 0.34, 0.18, 0.085, 0.035] as const;
+const MENU_TITLE_ID = "menu-active-title";
+const FOCUSABLE_SELECTOR = [
+  "a[href]",
+  "button:not([disabled])",
+  "input:not([disabled])",
+  "select:not([disabled])",
+  "textarea:not([disabled])",
+  "[tabindex]:not([tabindex='-1'])"
+].join(",");
 
 function carouselOpacity(distance: number) {
   const opacityIndex = Math.min(Math.abs(distance), CAROUSEL_OPACITY_BY_DISTANCE.length - 1);
@@ -36,6 +45,7 @@ export function MenuOverlay({
 }: MenuOverlayProps) {
   const codeTopRef = useRef<HTMLPreElement>(null);
   const codeBottomRef = useRef<HTMLPreElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
   const activeSection = sections[activeIndex];
 
   if (!activeSection) {
@@ -56,13 +66,73 @@ export function MenuOverlay({
 
   useMenuPanelCodeTyping(isOpen, activeSection.id, codeTopRef, codeBottomRef);
 
+  useEffect(() => {
+    if (!isOpen) return undefined;
+
+    const previouslyFocusedElement =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const focusFrameId = window.requestAnimationFrame(() => {
+      closeButtonRef.current?.focus();
+    });
+
+    const handleFocusTrap = (event: KeyboardEvent) => {
+      if (event.key !== "Tab") return;
+
+      const menuElement = menuRef.current;
+      if (!menuElement) return;
+
+      const focusableElements = Array.from(
+        menuElement.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)
+      ).filter((element) => element.offsetParent !== null);
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements.at(-1);
+
+      if (!firstElement || !lastElement) {
+        event.preventDefault();
+        menuElement.focus();
+        return;
+      }
+
+      if (!menuElement.contains(document.activeElement)) {
+        event.preventDefault();
+        firstElement.focus();
+        return;
+      }
+
+      if (event.shiftKey && document.activeElement === firstElement) {
+        event.preventDefault();
+        lastElement.focus();
+        return;
+      }
+
+      if (!event.shiftKey && document.activeElement === lastElement) {
+        event.preventDefault();
+        firstElement.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleFocusTrap);
+
+    return () => {
+      window.cancelAnimationFrame(focusFrameId);
+      document.removeEventListener("keydown", handleFocusTrap);
+
+      if (previouslyFocusedElement?.isConnected) {
+        previouslyFocusedElement.focus();
+      }
+    };
+  }, [isOpen, menuRef]);
+
   return (
     <section
       className="fullscreenMenu"
       data-open={isOpen}
       data-active={activeSection.id}
-      aria-label="Menu fullscreen"
+      role="dialog"
+      aria-modal={isOpen ? true : undefined}
+      aria-labelledby={MENU_TITLE_ID}
       aria-hidden={!isOpen}
+      tabIndex={-1}
       ref={menuRef}
     >
       <div className="menuRailWrap">
@@ -106,7 +176,13 @@ export function MenuOverlay({
       </div>
 
       <div className="menuStage">
-        <button className="menuClose" type="button" onClick={onCloseMenu} aria-label="Cerrar menú">
+        <button
+          className="menuClose"
+          type="button"
+          onClick={onCloseMenu}
+          aria-label="Cerrar menú"
+          ref={closeButtonRef}
+        >
           x
         </button>
 
@@ -119,7 +195,7 @@ export function MenuOverlay({
           <p className="menuKicker" data-menu-in>
             {activeSection.label}
           </p>
-          <h2 className="menuTitle" data-menu-in>
+          <h2 id={MENU_TITLE_ID} className="menuTitle" data-menu-in>
             {activeSection.label}
           </h2>
           <p className="menuCopy" data-menu-in>

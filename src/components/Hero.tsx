@@ -8,6 +8,7 @@ type HeroProps = {
   slotStyle: CSSProperties;
   heroRef: RefObject<HTMLElement | null>;
   arrowRef: RefObject<HTMLButtonElement | null>;
+  isMenuOpen: boolean;
   onOpenMenu: () => void;
 };
 
@@ -17,10 +18,17 @@ export function Hero({
   slotStyle,
   heroRef,
   arrowRef,
+  isMenuOpen,
   onOpenMenu
 }: HeroProps) {
   return (
-    <section className="hero" aria-label="Portada" ref={heroRef}>
+    <section
+      className="hero"
+      aria-label="Portada"
+      aria-hidden={isMenuOpen}
+      inert={isMenuOpen}
+      ref={heroRef}
+    >
       <div className="heroTopBar" data-hero-in>
         <a
           className="heroSocialLink"

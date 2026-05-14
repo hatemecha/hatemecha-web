@@ -63,6 +63,7 @@ export default function App() {
         slotStyle={slotStyle}
         heroRef={heroRef}
         arrowRef={arrowRef}
+        isMenuOpen={isMenuOpen}
         onOpenMenu={openMenu}
       />
       <MenuOverlay

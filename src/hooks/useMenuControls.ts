@@ -11,6 +11,33 @@ type UseMenuControlsArgs = {
 const NEXT_KEYS = new Set(["ArrowDown", "ArrowRight", "s", "S", "d", "D"]);
 const PREVIOUS_KEYS = new Set(["ArrowUp", "ArrowLeft", "w", "W", "a", "A"]);
 const OPEN_KEYS = new Set(["Enter", "ArrowDown", "s", "S"]);
+const INTERACTIVE_SELECTOR = [
+  "a[href]",
+  "button",
+  "input",
+  "select",
+  "textarea",
+  "summary",
+  "[role='button']",
+  "[role='link']",
+  "[tabindex]:not([tabindex='-1'])"
+].join(",");
+
+function isEditableTarget(target: EventTarget | null) {
+  if (!(target instanceof HTMLElement)) return false;
+
+  return (
+    target.isContentEditable ||
+    target instanceof HTMLInputElement ||
+    target instanceof HTMLSelectElement ||
+    target instanceof HTMLTextAreaElement
+  );
+}
+
+function isInteractiveTarget(target: EventTarget | null) {
+  if (!(target instanceof HTMLElement)) return false;
+  return Boolean(target.closest(INTERACTIVE_SELECTOR));
+}
 
 export function useMenuControls({
   isOpen,
@@ -24,7 +51,7 @@ export function useMenuControls({
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (!isOpen) {
-        if (OPEN_KEYS.has(event.key)) {
+        if (!isInteractiveTarget(event.target) && OPEN_KEYS.has(event.key)) {
           event.preventDefault();
           openMenu();
         }
@@ -36,13 +63,13 @@ export function useMenuControls({
         return;
       }
 
-      if (NEXT_KEYS.has(event.key)) {
+      if (!isEditableTarget(event.target) && NEXT_KEYS.has(event.key)) {
         event.preventDefault();
         activateNext();
         return;
       }
 
-      if (PREVIOUS_KEYS.has(event.key)) {
+      if (!isEditableTarget(event.target) && PREVIOUS_KEYS.has(event.key)) {
         event.preventDefault();
         activatePrevious();
       }
