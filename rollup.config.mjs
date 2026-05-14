@@ -90,6 +90,13 @@ function copyStaticAssets() {
 
 export default {
   input: "src/main.tsx",
+  onwarn(warning, warn) {
+    if (warning.code === "MODULE_LEVEL_DIRECTIVE" && warning.id?.includes("node_modules")) {
+      return;
+    }
+
+    warn(warning);
+  },
   output: {
     dir: "dist/assets",
     format: "esm",

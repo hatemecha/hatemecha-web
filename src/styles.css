@@ -10,6 +10,7 @@
   --font-display: "Bebas Neue", "Impact", "Arial Black", sans-serif;
   --font-body: "Aptos", "Segoe UI", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --font-mono: "Share Tech Mono", "Cascadia Mono", "SFMono-Regular", Consolas, ui-monospace, monospace;
+  --font-jp: "Yu Gothic", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Meiryo", sans-serif;
   --rail-width: clamp(190px, 24vw, 330px);
   --signal-slot-gap: clamp(7px, 1vw, 13px);
   font-family: var(--font-body);
@@ -52,6 +53,13 @@ img {
   min-height: 100svh;
   overflow: hidden;
   isolation: isolate;
+}
+
+.appView {
+  position: absolute;
+  inset: 0;
+  min-height: 100svh;
+  will-change: opacity, transform;
 }
 
 .appShell::before,
@@ -102,13 +110,14 @@ img {
   place-items: center;
   padding: clamp(18px, 4vw, 68px);
   transition:
-    opacity 420ms ease,
-    transform 620ms cubic-bezier(0.16, 1, 0.3, 1);
+    opacity 720ms ease,
+    transform 920ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
 }
 
 .appShell[data-menu-open="true"] .hero {
   opacity: 0;
-  transform: translateY(7vh) scale(0.985);
+  transform: translateY(9vh) scale(0.975);
   pointer-events: none;
 }
 
@@ -332,20 +341,25 @@ img {
     linear-gradient(180deg, oklch(0% 0 0 / 0.16), oklch(0% 0 0 / 0.72)),
     url("/assets/hatemecha-bg-blur-noise.webp") center / cover no-repeat;
   color: var(--fg);
+  opacity: 0;
   pointer-events: none;
-  transform: translateY(-106%);
+  transform: translateY(-104%) scale(0.992);
   visibility: hidden;
+  will-change: opacity, transform;
   transition:
-    transform 760ms cubic-bezier(0.16, 1, 0.3, 1),
-    visibility 0s linear 760ms;
+    opacity 640ms ease,
+    transform 920ms cubic-bezier(0.16, 1, 0.3, 1),
+    visibility 0s linear 920ms;
 }
 
 .fullscreenMenu[data-open="true"] {
+  opacity: 1;
   pointer-events: auto;
-  transform: translateY(0);
+  transform: translateY(0) scale(1);
   visibility: visible;
   transition:
-    transform 760ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 680ms ease,
+    transform 980ms cubic-bezier(0.16, 1, 0.3, 1),
     visibility 0s linear 0s;
 }
 
@@ -567,11 +581,12 @@ img {
   align-items: center;
   margin: 0 0 clamp(20px, 2.4vw, 28px);
   color: var(--accent);
-  font-family: var(--font-mono);
+  font-family: var(--font-jp);
   font-size: clamp(12px, 1vw, 15px);
   font-weight: 900;
+  letter-spacing: 0.14em;
   line-height: 1;
-  text-transform: lowercase;
+  text-transform: none;
 }
 
 .menuKicker::before {
@@ -861,6 +876,26 @@ img {
   scrollbar-width: thin;
 }
 
+.smoothPageContent {
+  min-height: 100%;
+  will-change: opacity, transform;
+}
+
+.projectsPage {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  min-height: 100svh;
+  overflow: auto;
+  padding: clamp(136px, 19vh, 196px) clamp(16px, 4.8vw, 82px) clamp(44px, 8vh, 84px);
+  background:
+    oklch(0% 0 0 / 0.58),
+    url("/assets/hatemecha-bg-blur-noise.webp") center / cover fixed no-repeat;
+  color: var(--fg);
+  scrollbar-color: var(--accent) var(--ink);
+  scrollbar-width: thin;
+}
+
 .galleryPage::before {
   content: "";
   position: fixed;
@@ -871,6 +906,21 @@ img {
     linear-gradient(180deg, oklch(100% 0 0 / 0.05) 0 1px, transparent 1px 100%);
   background-size: clamp(74px, 7vw, 132px) clamp(74px, 7vw, 132px);
   opacity: 0.18;
+  pointer-events: none;
+}
+
+.projectsPage::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      rgb(var(--accent-rgb) / 0.18) 0 1px,
+      transparent 1px clamp(78px, 8vw, 132px)
+    );
+  opacity: 0.16;
   pointer-events: none;
 }
 
@@ -891,20 +941,41 @@ img {
     url("/assets/hatemecha-bg-blur-noise.webp") center / cover no-repeat;
 }
 
+.projectsHeader {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+}
+
+.projectsHeader .galleryHeaderMark {
+  grid-column: 2;
+}
+
+.projectsHeader .galleryHeaderMeta {
+  grid-column: 3;
+  justify-self: end;
+}
+
 .galleryHeaderMark {
   display: grid;
   gap: 2px;
 }
 
+.projectsHeader .galleryHeaderMark {
+  justify-items: center;
+  gap: 3px;
+  text-align: center;
+}
+
 .galleryKicker {
   margin: 0;
   color: var(--accent);
-  font-family: var(--font-mono);
+  font-family: var(--font-jp);
   font-size: clamp(10px, 0.85vw, 13px);
   font-weight: 900;
   letter-spacing: 0.16em;
   line-height: 1;
-  text-transform: lowercase;
+  text-transform: none;
 }
 
 .galleryTitle {
@@ -965,6 +1036,123 @@ img {
 .galleryLightboxNav:focus-visible {
   background: oklch(0% 0 0 / 0.78);
   color: var(--accent);
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.projectsList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  width: min(100%, 980px);
+  margin: 0 auto;
+  gap: clamp(18px, 3vw, 38px);
+}
+
+.projectRow {
+  position: relative;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: clamp(18px, 2vw, 28px);
+  min-height: clamp(280px, 27vw, 360px);
+  aspect-ratio: 1 / 1;
+  padding: clamp(20px, 2.6vw, 34px);
+  border: 1px solid rgb(var(--accent-rgb) / 0.34);
+  background: oklch(0% 0 0 / 0.58);
+  overflow: hidden;
+  transition:
+    background 170ms ease,
+    border-color 170ms ease,
+    color 170ms ease,
+    transform 170ms ease;
+}
+
+.projectRow::before {
+  content: "";
+  position: absolute;
+  left: clamp(20px, 2.6vw, 34px);
+  top: clamp(20px, 2.6vw, 34px);
+  width: clamp(30px, 4vw, 52px);
+  height: 3px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 170ms ease;
+}
+
+.projectRow:hover,
+.projectRow:focus-within {
+  background: oklch(0% 0 0 / 0.7);
+  border-color: rgb(var(--accent-rgb) / 0.74);
+  transform: translateY(-3px);
+}
+
+.projectRow:hover::before,
+.projectRow:focus-within::before {
+  transform: scaleX(1);
+}
+
+.projectBody {
+  display: grid;
+  align-content: start;
+  gap: clamp(14px, 1.7vw, 22px);
+  min-width: 0;
+  padding-top: clamp(24px, 3vw, 42px);
+}
+
+.projectTitle {
+  margin: 0;
+  color: var(--fg);
+  font-family: var(--font-display);
+  font-size: clamp(40px, 5vw, 76px);
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 0.82;
+  text-transform: lowercase;
+}
+
+.projectDescription {
+  max-width: 62ch;
+  margin: 0;
+  color: oklch(92% 0.008 95 / 0.88);
+  font-family: var(--font-mono);
+  font-size: clamp(13px, 1.25vw, 18px);
+  font-weight: 800;
+  line-height: 1.34;
+  text-wrap: pretty;
+}
+
+.projectActions {
+  display: flex;
+  align-items: center;
+  align-self: end;
+  gap: clamp(8px, 1vw, 12px);
+}
+
+.projectActions a {
+  display: grid;
+  flex: 1;
+  min-width: clamp(58px, 5.6vw, 82px);
+  min-height: clamp(34px, 3vw, 42px);
+  place-items: center;
+  border: 1px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: clamp(12px, 1vw, 15px);
+  font-weight: 900;
+  line-height: 1;
+  text-decoration: none;
+  text-transform: lowercase;
+  transition:
+    background 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.projectActions a:hover,
+.projectActions a:focus-visible {
+  background: var(--accent);
+  color: var(--ink);
   outline: none;
   transform: translateY(-1px);
 }
@@ -1371,6 +1559,10 @@ img {
     padding: clamp(78px, 11vh, 108px) 10px 34px;
   }
 
+  .projectsPage {
+    padding: clamp(108px, 15vh, 138px) 12px 34px;
+  }
+
   .galleryHeader {
     align-items: center;
     padding-inline: 12px;
@@ -1393,6 +1585,25 @@ img {
     min-width: 72px;
     min-height: 38px;
     font-size: 16px;
+  }
+
+  .projectRow {
+    min-height: 0;
+    aspect-ratio: auto;
+    gap: 22px;
+    padding: 18px;
+  }
+
+  .projectTitle {
+    font-size: clamp(38px, 12vw, 72px);
+  }
+
+  .projectDescription {
+    font-size: clamp(12px, 3.2vw, 16px);
+  }
+
+  .projectActions {
+    width: 100%;
   }
 
   .galleryGrid {
@@ -1506,6 +1717,15 @@ img {
 
   .galleryCount {
     display: none;
+  }
+
+  .projectTitle {
+    font-size: clamp(34px, 11vw, 48px);
+  }
+
+  .projectActions a {
+    min-height: 40px;
+    font-size: 15px;
   }
 
   .galleryGrid {

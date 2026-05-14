@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useMenuPanelCodeTyping } from "../hooks/useMenuPanelCodeTyping";
 import { normalizePortfolioSectionIndex, type PortfolioSection } from "../data/portfolioSections";
 import { FloatingImages } from "./FloatingImages";
+import { ScrambleText } from "./ScrambleText";
 
 const CAROUSEL_RADIUS = 4;
 const CAROUSEL_OPACITY_BY_DISTANCE = [1, 0.34, 0.18, 0.085, 0.035] as const;
@@ -34,6 +35,7 @@ type MenuOverlayProps = {
   onSelectSection: (index: number) => void;
   onCloseMenu: () => void;
   onOpenGallery: () => void;
+  onOpenProjects: () => void;
 };
 
 export function MenuOverlay({
@@ -43,7 +45,8 @@ export function MenuOverlay({
   isOpen,
   onSelectSection,
   onCloseMenu,
-  onOpenGallery
+  onOpenGallery,
+  onOpenProjects
 }: MenuOverlayProps) {
   const codeTopRef = useRef<HTMLPreElement>(null);
   const codeBottomRef = useRef<HTMLPreElement>(null);
@@ -67,6 +70,20 @@ export function MenuOverlay({
   }, [activeIndex, sections]);
 
   useMenuPanelCodeTyping(isOpen, activeSection.id, codeTopRef, codeBottomRef);
+
+  const enterActiveSection = () => {
+    if (activeSection.id === "galeria") {
+      onOpenGallery();
+      return;
+    }
+
+    if (activeSection.id === "proyectos") {
+      onOpenProjects();
+      return;
+    }
+
+    onCloseMenu();
+  };
 
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -172,9 +189,13 @@ export function MenuOverlay({
             );
           })}
         </nav>
-        <p id="menu-controls-hint" className="menuControlsHint" data-menu-in>
-          ↑↓ ←→ · WASD · rueda
-        </p>
+        <ScrambleText
+          id="menu-controls-hint"
+          className="menuControlsHint"
+          text="↑↓ ←→ · WASD · rueda"
+          delay={220}
+          data-menu-in
+        />
       </div>
 
       <div className="menuStage">
@@ -194,20 +215,16 @@ export function MenuOverlay({
             className="menuCodeSnippet menuCodeSnippetTop"
             aria-hidden="true"
           />
-          <p className="menuKicker" data-menu-in>
-            {activeSection.label}
-          </p>
+          <ScrambleText className="menuKicker" text={activeSection.jaLabel} delay={120} data-menu-in />
           <h2 id={MENU_TITLE_ID} className="menuTitle" data-menu-in>
             {activeSection.label}
           </h2>
-          <p className="menuCopy" data-menu-in>
-            {activeSection.copy}
-          </p>
+          <ScrambleText className="menuCopy" text={activeSection.copy} delay={260} data-menu-in />
           <button
             className="enterButton"
             type="button"
             aria-label={`Entrar en ${activeSection.label}`}
-            onClick={activeSection.id === "galeria" ? onOpenGallery : onCloseMenu}
+            onClick={enterActiveSection}
             data-menu-in
           >
             enter

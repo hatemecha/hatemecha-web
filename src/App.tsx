@@ -1,7 +1,9 @@
 import { useCallback, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
 import { GalleryPage } from "./components/GalleryPage";
 import { Hero } from "./components/Hero";
 import { MenuOverlay } from "./components/MenuOverlay";
+import { ProjectsPage } from "./components/ProjectsPage";
 import { normalizePortfolioSectionIndex, portfolioSections } from "./data/portfolioSections";
 import { useAnimeMotion } from "./hooks/useAnimeMotion";
 import { useMeasuredTitleSlots } from "./hooks/useMeasuredTitleSlots";
@@ -9,9 +11,24 @@ import { useMenuControls } from "./hooks/useMenuControls";
 
 const sectionCount: number = portfolioSections.length;
 const gallerySectionIndex = portfolioSections.findIndex((section) => section.id === "galeria");
+const projectsSectionIndex = portfolioSections.findIndex((section) => section.id === "proyectos");
+const viewTransition = {
+  duration: 0.64,
+  ease: [0.16, 1, 0.3, 1]
+} as const;
+const viewMotion = {
+  initial: { opacity: 0, y: 28, scale: 0.992 },
+  animate: { opacity: 1, y: 0, scale: 1 },
+  exit: { opacity: 0, y: -22, scale: 0.992 },
+  transition: viewTransition
+} as const;
 
 if (gallerySectionIndex < 0) {
   throw new Error("The gallery section is required.");
+}
+
+if (projectsSectionIndex < 0) {
+  throw new Error("The projects section is required.");
 }
 
 function getNormalizedSectionIndex(index: number) {
@@ -29,9 +46,9 @@ function getNormalizedSectionIndex(index: number) {
 export default function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [activeView, setActiveView] = useState<"home" | "gallery">("home");
+  const [activeView, setActiveView] = useState<"home" | "gallery" | "projects">("home");
   const { hateRef, mechaRef, slotStyle } = useMeasuredTitleSlots();
-  const { heroRef, menuRef, arrowRef, pulseArrow } = useAnimeMotion(isMenuOpen);
+  const { heroRef, menuRef, arrowRef, pulseArrow } = useAnimeMotion(isMenuOpen, activeIndex);
 
   const openMenu = useCallback(() => {
     pulseArrow();
@@ -47,11 +64,24 @@ export default function App() {
     setIsMenuOpen(false);
   }, []);
 
-  const returnToGalleryMenu = useCallback(() => {
-    setActiveIndex(gallerySectionIndex);
+  const openProjects = useCallback(() => {
+    setActiveView("projects");
+    setIsMenuOpen(false);
+  }, []);
+
+  const returnToSectionMenu = useCallback((sectionIndex: number) => {
+    setActiveIndex(sectionIndex);
     setActiveView("home");
     setIsMenuOpen(true);
   }, []);
+
+  const returnToGalleryMenu = useCallback(() => {
+    returnToSectionMenu(gallerySectionIndex);
+  }, [returnToSectionMenu]);
+
+  const returnToProjectsMenu = useCallback(() => {
+    returnToSectionMenu(projectsSectionIndex);
+  }, [returnToSectionMenu]);
 
   const activatePrevious = useCallback(() => {
     setActiveIndex((currentIndex) => getNormalizedSectionIndex(currentIndex - 1));
@@ -75,30 +105,39 @@ export default function App() {
 
   return (
     <main className="appShell" data-menu-open={isMenuOpen} data-view={activeView}>
-      {activeView === "gallery" ? (
-        <GalleryPage onBackToMenu={returnToGalleryMenu} />
-      ) : (
-        <>
-          <Hero
-            hateRef={hateRef}
-            mechaRef={mechaRef}
-            slotStyle={slotStyle}
-            heroRef={heroRef}
-            arrowRef={arrowRef}
-            isMenuOpen={isMenuOpen}
-            onOpenMenu={openMenu}
-          />
-          <MenuOverlay
-            menuRef={menuRef}
-            sections={portfolioSections}
-            activeIndex={activeIndex}
-            isOpen={isMenuOpen}
-            onSelectSection={selectSection}
-            onCloseMenu={closeMenu}
-            onOpenGallery={openGallery}
-          />
-        </>
-      )}
+      <AnimatePresence mode="wait" initial={false}>
+        {activeView === "gallery" ? (
+          <motion.div className="appView" key="gallery" {...viewMotion}>
+            <GalleryPage onBackToMenu={returnToGalleryMenu} />
+          </motion.div>
+        ) : activeView === "projects" ? (
+          <motion.div className="appView" key="projects" {...viewMotion}>
+            <ProjectsPage onBackToMenu={returnToProjectsMenu} />
+          </motion.div>
+        ) : (
+          <motion.div className="appView appViewHome" key="home" {...viewMotion}>
+            <Hero
+              hateRef={hateRef}
+              mechaRef={mechaRef}
+              slotStyle={slotStyle}
+              heroRef={heroRef}
+              arrowRef={arrowRef}
+              isMenuOpen={isMenuOpen}
+              onOpenMenu={openMenu}
+            />
+            <MenuOverlay
+              menuRef={menuRef}
+              sections={portfolioSections}
+              activeIndex={activeIndex}
+              isOpen={isMenuOpen}
+              onSelectSection={selectSection}
+              onCloseMenu={closeMenu}
+              onOpenGallery={openGallery}
+              onOpenProjects={openProjects}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   );
 }

@@ -1,9 +1,32 @@
 import { useEffect, useMemo, useState } from "react";
+import { motion } from "motion/react";
 import { galleryItems, type GalleryItem } from "../data/galleryManifest";
+import { useLenisScroll } from "../hooks/useLenisScroll";
+import { ScrambleText } from "./ScrambleText";
 
 type GalleryPageProps = {
   onBackToMenu: () => void;
 };
+const pageContentTransition = {
+  duration: 0.68,
+  ease: [0.16, 1, 0.3, 1]
+} as const;
+const pageContentVariants = {
+  hidden: { opacity: 0, y: 28 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      ...pageContentTransition,
+      delay: 0.08,
+      staggerChildren: 0.022
+    }
+  }
+} as const;
+const pageItemVariants = {
+  hidden: { opacity: 0, y: 20, scale: 0.985 },
+  visible: { opacity: 1, y: 0, scale: 1, transition: pageContentTransition }
+} as const;
 
 function getPhotoAspectRatio(item: GalleryItem) {
   if (item.width <= 0 || item.height <= 0) return "1 / 1";
@@ -21,6 +44,7 @@ function getItemSpan(item: GalleryItem, index: number) {
 
 export function GalleryPage({ onBackToMenu }: GalleryPageProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const pageRef = useLenisScroll<HTMLElement>();
   const activeItem = activeIndex === null ? null : galleryItems[activeIndex] ?? null;
   const itemCountLabel = `${galleryItems.length} img${galleryItems.length === 1 ? "" : "s"}`;
 
@@ -70,10 +94,10 @@ export function GalleryPage({ onBackToMenu }: GalleryPageProps) {
   }, [activeIndex, onBackToMenu]);
 
   return (
-    <section className="galleryPage" aria-labelledby="gallery-title">
+    <section className="galleryPage" aria-labelledby="gallery-title" ref={pageRef}>
       <header className="galleryHeader">
         <div className="galleryHeaderMark">
-          <p className="galleryKicker">archivo visual</p>
+          <ScrambleText className="galleryKicker" text="ギャラリー" delay={80} />
           <h1 id="gallery-title" className="galleryTitle">
             galeria
           </h1>
@@ -86,36 +110,45 @@ export function GalleryPage({ onBackToMenu }: GalleryPageProps) {
         </div>
       </header>
 
-      {galleryItems.length > 0 ? (
-        <div className="galleryGrid" aria-label="Fotos de galeria">
-          {galleryItems.map((item, index) => (
-            <button
-              className="galleryTile"
-              type="button"
-              key={item.id}
-              data-span={getItemSpan(item, index)}
-              onClick={() => setActiveIndex(index)}
-              style={{ aspectRatio: getPhotoAspectRatio(item) }}
-            >
-              <img
-                className="galleryThumb"
-                src={item.thumbSrc}
-                alt={item.alt || item.filename}
-                draggable="false"
-                loading={index < 10 ? "eager" : "lazy"}
-              />
-              <span className="galleryTileIndex" aria-hidden="true">
-                {String(index + 1).padStart(2, "0")}
-              </span>
-            </button>
-          ))}
-        </div>
-      ) : (
-        <div className="galleryEmpty" role="status">
-          <p className="galleryEmptyCode">/public/galeria/originales</p>
-          <p>subi fotos a la carpeta y corre `npm run gallery:sync`.</p>
-        </div>
-      )}
+      <motion.div
+        className="smoothPageContent"
+        data-lenis-content
+        initial="hidden"
+        animate="visible"
+        variants={pageContentVariants}
+      >
+        {galleryItems.length > 0 ? (
+          <motion.div className="galleryGrid" aria-label="Fotos de galeria" variants={pageContentVariants}>
+            {galleryItems.map((item, index) => (
+              <motion.button
+                className="galleryTile"
+                type="button"
+                key={item.id}
+                data-span={getItemSpan(item, index)}
+                onClick={() => setActiveIndex(index)}
+                style={{ aspectRatio: getPhotoAspectRatio(item) }}
+                variants={pageItemVariants}
+              >
+                <img
+                  className="galleryThumb"
+                  src={item.thumbSrc}
+                  alt={item.alt || item.filename}
+                  draggable="false"
+                  loading={index < 10 ? "eager" : "lazy"}
+                />
+                <span className="galleryTileIndex" aria-hidden="true">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+              </motion.button>
+            ))}
+          </motion.div>
+        ) : (
+          <motion.div className="galleryEmpty" role="status" variants={pageItemVariants}>
+            <ScrambleText className="galleryEmptyCode" text="/public/galeria/originales" delay={120} />
+            <ScrambleText text="subi fotos a la carpeta y corre `npm run gallery:sync`." delay={260} />
+          </motion.div>
+        )}
+      </motion.div>
 
       {activeItem ? (
         <div className="galleryLightbox" role="dialog" aria-modal="true" aria-label={lightboxLabel}>

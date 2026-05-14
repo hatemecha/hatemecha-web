@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef } from "react";
 import { animate } from "animejs/animation";
 
-export function useAnimeMotion(isMenuOpen: boolean) {
+export function useAnimeMotion(isMenuOpen: boolean, menuMotionKey: number) {
   const heroRef = useRef<HTMLElement>(null);
   const menuRef = useRef<HTMLElement>(null);
   const arrowRef = useRef<HTMLButtonElement>(null);
+  const wasMenuOpenRef = useRef(false);
 
   useEffect(() => {
     const heroElement = heroRef.current;
@@ -12,9 +13,9 @@ export function useAnimeMotion(isMenuOpen: boolean) {
 
     const animation = animate(heroElement.querySelectorAll("[data-hero-in]"), {
       opacity: [0, 1],
-      translateY: [22, 0],
-      duration: 760,
-      delay: (_target: unknown, index: number) => index * 85,
+      translateY: [28, 0],
+      duration: 920,
+      delay: (_target: unknown, index: number) => index * 105,
       ease: "out(3)"
     });
 
@@ -25,20 +26,27 @@ export function useAnimeMotion(isMenuOpen: boolean) {
 
   useEffect(() => {
     const menuElement = menuRef.current;
+    const openedNow = isMenuOpen && !wasMenuOpenRef.current;
+    wasMenuOpenRef.current = isMenuOpen;
+
     if (!menuElement || !isMenuOpen || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    const animation = animate(menuElement.querySelectorAll("[data-menu-in]"), {
+    const targetSelector = openedNow
+      ? "[data-menu-in], .floatingImages"
+      : ".menuPanel [data-menu-in], .floatingImages";
+
+    const animation = animate(menuElement.querySelectorAll(targetSelector), {
       opacity: [0, 1],
-      translateY: [-12, 0],
-      duration: 520,
-      delay: (_target: unknown, index: number) => index * 48,
+      translateY: [openedNow ? -18 : 14, 0],
+      duration: openedNow ? 740 : 520,
+      delay: (_target: unknown, index: number) => index * (openedNow ? 52 : 36),
       ease: "out(3)"
     });
 
     return () => {
       animation.revert();
     };
-  }, [isMenuOpen]);
+  }, [isMenuOpen, menuMotionKey]);
 
   const pulseArrow = useCallback(() => {
     const arrowElement = arrowRef.current;
