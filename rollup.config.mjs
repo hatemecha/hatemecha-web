@@ -3,7 +3,7 @@ import { nodeResolve } from "@rollup/plugin-node-resolve";
 import replace from "@rollup/plugin-replace";
 import terser from "@rollup/plugin-terser";
 import typescript from "@rollup/plugin-typescript";
-import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { cp, mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -63,6 +63,19 @@ function copyStaticAssets() {
         force: true,
         recursive: true
       });
+
+      const galleryDirectory = path.join(rootDirectory, "public", "galeria");
+      const galleryExists = await stat(galleryDirectory)
+        .then((stats) => stats.isDirectory())
+        .catch(() => false);
+
+      if (galleryExists) {
+        await cp(galleryDirectory, path.join(distDirectory, "galeria"), {
+          force: true,
+          recursive: true
+        });
+      }
+
       await cp(path.join(rootDirectory, "src", "styles.css"), path.join(distAssetsDirectory, "app.css"), {
         force: true
       });

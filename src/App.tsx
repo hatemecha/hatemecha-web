@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { GalleryPage } from "./components/GalleryPage";
 import { Hero } from "./components/Hero";
 import { MenuOverlay } from "./components/MenuOverlay";
 import { normalizePortfolioSectionIndex, portfolioSections } from "./data/portfolioSections";
@@ -7,6 +8,11 @@ import { useMeasuredTitleSlots } from "./hooks/useMeasuredTitleSlots";
 import { useMenuControls } from "./hooks/useMenuControls";
 
 const sectionCount: number = portfolioSections.length;
+const gallerySectionIndex = portfolioSections.findIndex((section) => section.id === "galeria");
+
+if (gallerySectionIndex < 0) {
+  throw new Error("The gallery section is required.");
+}
 
 function getNormalizedSectionIndex(index: number) {
   if (!Number.isInteger(index)) {
@@ -23,6 +29,7 @@ function getNormalizedSectionIndex(index: number) {
 export default function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [activeView, setActiveView] = useState<"home" | "gallery">("home");
   const { hateRef, mechaRef, slotStyle } = useMeasuredTitleSlots();
   const { heroRef, menuRef, arrowRef, pulseArrow } = useAnimeMotion(isMenuOpen);
 
@@ -33,6 +40,17 @@ export default function App() {
 
   const closeMenu = useCallback(() => {
     setIsMenuOpen(false);
+  }, []);
+
+  const openGallery = useCallback(() => {
+    setActiveView("gallery");
+    setIsMenuOpen(false);
+  }, []);
+
+  const returnToGalleryMenu = useCallback(() => {
+    setActiveIndex(gallerySectionIndex);
+    setActiveView("home");
+    setIsMenuOpen(true);
   }, []);
 
   const activatePrevious = useCallback(() => {
@@ -56,24 +74,31 @@ export default function App() {
   });
 
   return (
-    <main className="appShell" data-menu-open={isMenuOpen}>
-      <Hero
-        hateRef={hateRef}
-        mechaRef={mechaRef}
-        slotStyle={slotStyle}
-        heroRef={heroRef}
-        arrowRef={arrowRef}
-        isMenuOpen={isMenuOpen}
-        onOpenMenu={openMenu}
-      />
-      <MenuOverlay
-        menuRef={menuRef}
-        sections={portfolioSections}
-        activeIndex={activeIndex}
-        isOpen={isMenuOpen}
-        onSelectSection={selectSection}
-        onCloseMenu={closeMenu}
-      />
+    <main className="appShell" data-menu-open={isMenuOpen} data-view={activeView}>
+      {activeView === "gallery" ? (
+        <GalleryPage onBackToMenu={returnToGalleryMenu} />
+      ) : (
+        <>
+          <Hero
+            hateRef={hateRef}
+            mechaRef={mechaRef}
+            slotStyle={slotStyle}
+            heroRef={heroRef}
+            arrowRef={arrowRef}
+            isMenuOpen={isMenuOpen}
+            onOpenMenu={openMenu}
+          />
+          <MenuOverlay
+            menuRef={menuRef}
+            sections={portfolioSections}
+            activeIndex={activeIndex}
+            isOpen={isMenuOpen}
+            onSelectSection={selectSection}
+            onCloseMenu={closeMenu}
+            onOpenGallery={openGallery}
+          />
+        </>
+      )}
     </main>
   );
 }
