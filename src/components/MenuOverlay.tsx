@@ -1,22 +1,20 @@
 import type { CSSProperties, RefObject } from "react";
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
+import { useMenuPanelCodeTyping } from "../hooks/useMenuPanelCodeTyping";
 import { normalizePortfolioSectionIndex, type PortfolioSection } from "../data/portfolioSections";
 import { FloatingImages } from "./FloatingImages";
 
 const CAROUSEL_RADIUS = 4;
+const CAROUSEL_OPACITY_BY_DISTANCE = [1, 0.34, 0.18, 0.085, 0.035] as const;
 
 function carouselOpacity(distance: number) {
-  const d = Math.abs(distance);
-  if (d === 0) return 1;
-  if (d === 1) return 0.34;
-  if (d === 2) return 0.18;
-  if (d === 3) return 0.085;
-  return 0.035;
+  const opacityIndex = Math.min(Math.abs(distance), CAROUSEL_OPACITY_BY_DISTANCE.length - 1);
+  return CAROUSEL_OPACITY_BY_DISTANCE[opacityIndex];
 }
 
 function carouselScale(distance: number) {
-  const s = 1 - Math.abs(distance) * 0.042;
-  return Math.max(0.82, s);
+  const scale = 1 - Math.abs(distance) * 0.042;
+  return Math.max(0.82, scale);
 }
 
 type MenuOverlayProps = {
@@ -36,6 +34,8 @@ export function MenuOverlay({
   onSelectSection,
   onCloseMenu
 }: MenuOverlayProps) {
+  const codeTopRef = useRef<HTMLPreElement>(null);
+  const codeBottomRef = useRef<HTMLPreElement>(null);
   const activeSection = sections[activeIndex];
 
   if (!activeSection) {
@@ -53,6 +53,8 @@ export function MenuOverlay({
       };
     });
   }, [activeIndex, sections]);
+
+  useMenuPanelCodeTyping(isOpen, activeSection.id, codeTopRef, codeBottomRef);
 
   return (
     <section
@@ -109,6 +111,11 @@ export function MenuOverlay({
         </button>
 
         <article className="menuPanel" aria-live="polite">
+          <pre
+            ref={codeTopRef}
+            className="menuCodeSnippet menuCodeSnippetTop"
+            aria-hidden="true"
+          />
           <p className="menuKicker" data-menu-in>
             {activeSection.label}
           </p>
@@ -127,6 +134,11 @@ export function MenuOverlay({
           >
             enter
           </button>
+          <pre
+            ref={codeBottomRef}
+            className="menuCodeSnippet menuCodeSnippetBottom"
+            aria-hidden="true"
+          />
         </article>
 
         <FloatingImages activeId={activeSection.id} />

@@ -488,6 +488,8 @@ img {
   display: grid;
   min-height: 100svh;
   align-items: center;
+  isolation: isolate;
+  overflow: hidden;
   padding: clamp(32px, 7vw, 110px);
 }
 
@@ -524,8 +526,52 @@ img {
 .menuPanel {
   position: relative;
   z-index: 4;
-  width: min(55vw, 620px);
+  width: min(50vw, 620px);
   margin-left: min(6vw, 86px);
+}
+
+.menuCodeSnippet {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: clamp(6px, 1vw, 12px) 0;
+  border: none;
+  background: transparent;
+  color: oklch(72% 0.03 15 / 0.46);
+  font-family: var(--font-mono);
+  font-size: clamp(8.5px, 0.8vw, 12px);
+  font-weight: 600;
+  line-height: 1.34;
+  letter-spacing: 0;
+  white-space: pre-wrap;
+  overflow: visible;
+  overflow-wrap: anywhere;
+  min-height: clamp(3.75rem, 8.5vh, 5.75rem);
+  pointer-events: none;
+  user-select: none;
+}
+
+.menuCodeSnippetTop {
+  margin: 0 0 clamp(16px, 2.8vw, 36px);
+}
+
+.menuCodeSnippetBottom {
+  margin: clamp(20px, 3.2vw, 44px) 0 0;
+}
+
+.menuCodeLine {
+  display: block;
+  opacity: 0;
+  transform: translateY(4px);
+  animation: codeLineIn 380ms ease forwards;
+}
+
+@keyframes codeLineIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .menuKicker {
@@ -621,11 +667,16 @@ img {
   border: 0;
   background: transparent;
   object-fit: contain;
-  opacity: 0.62;
-  filter: grayscale(1) contrast(1.12) brightness(1.02);
-  transition: transform 720ms cubic-bezier(0.16, 1, 0.3, 1), opacity 280ms ease;
-  animation: menuPhotoBreath 7.5s ease-in-out infinite alternate;
-  will-change: transform, opacity;
+  opacity: 1;
+  pointer-events: auto;
+  filter: grayscale(1) contrast(1.06) brightness(1.02);
+  transition:
+    filter 220ms ease,
+    transform 720ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.floatingImage:hover {
+  filter: grayscale(0) contrast(1.04) brightness(1.02);
 }
 
 .floatingImageStrip {
@@ -646,34 +697,35 @@ img {
   max-height: min(30vh, 260px);
   height: auto;
   object-position: 100% 100%;
-  animation-delay: -2.6s;
 }
 
 .homeScatter {
   position: absolute;
   inset: 0;
   box-sizing: border-box;
-  padding: clamp(88px, 12vh, 140px) clamp(16px, 3vw, 48px) clamp(24px, 5vh, 80px) clamp(10px, 2vw, 28px);
-  padding-left: clamp(240px, 48%, 580px);
+  padding: clamp(86px, 10vh, 126px) clamp(18px, 4vw, 68px) clamp(36px, 6vh, 86px) clamp(280px, 40vw, 540px);
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
-  grid-template-rows: auto auto 1fr;
-  column-gap: clamp(14px, 2.2vw, 32px);
-  row-gap: clamp(18px, 3.5vh, 40px);
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-rows: repeat(12, minmax(0, 1fr));
   align-items: start;
   justify-items: stretch;
+  pointer-events: none;
 }
 
 .homeScatterFigure {
+  position: relative;
+  z-index: 1;
   margin: 0;
   max-width: 100%;
   display: grid;
   align-items: start;
+  width: max-content;
   column-gap: clamp(8px, 1.2vw, 14px);
+  pointer-events: auto;
 }
 
 .homeScatterFigure[data-caption-side="start"] {
-  grid-template-columns: auto minmax(0, min(26vw, 200px));
+  grid-template-columns: auto auto;
 }
 
 .homeScatterFigure[data-caption-side="start"] .homeScatterLabel {
@@ -682,7 +734,7 @@ img {
 }
 
 .homeScatterFigure[data-caption-side="end"] {
-  grid-template-columns: minmax(0, min(30vw, 240px)) auto;
+  grid-template-columns: auto auto;
 }
 
 .homeScatterFigure[data-caption-side="end"] .homeScatterLabel {
@@ -704,64 +756,67 @@ img {
 }
 
 .homeScatterFrame {
+  position: relative;
   min-width: 0;
+  overflow: hidden;
   border: 1px solid oklch(100% 0 0 / 0.22);
   background: oklch(0% 0 0 / 0.4);
   box-shadow: 0 18px 40px oklch(0% 0 0 / 0.35);
-  animation: menuPhotoBreath 7.5s ease-in-out infinite alternate;
-}
-
-.homeScatterFigure:nth-child(2) .homeScatterFrame {
-  animation-delay: -2.5s;
-}
-
-.homeScatterFigure:nth-child(3) .homeScatterFrame {
-  animation-delay: -5s;
 }
 
 .homeScatterImg {
   display: block;
   width: 100%;
-  height: auto;
-  object-fit: contain;
+  height: 100%;
+  object-fit: cover;
   object-position: center;
-  filter: grayscale(1) contrast(1.1) brightness(1.02);
+  opacity: 1;
+  filter: grayscale(1) contrast(1.05) brightness(1.02);
+  transition: filter 220ms ease;
+}
+
+.homeScatterFigure:hover .homeScatterImg {
+  filter: grayscale(0) contrast(1.04) brightness(1.02);
+}
+
+.homeScatterFigure:hover .homeScatterFrame {
+  border-color: rgb(var(--accent-rgb) / 0.85);
 }
 
 .homeScatterFigure--one {
-  grid-column: 2;
-  grid-row: 1;
+  grid-column: 8 / -1;
+  grid-row: 1 / 5;
   justify-self: end;
   align-self: start;
-  margin-top: clamp(0px, 1.5vh, 20px);
+  margin-top: clamp(0px, 1vh, 12px);
 }
 
-.homeScatterFigure--one .homeScatterImg {
-  max-height: min(24vh, 200px);
+.homeScatterFigure--one .homeScatterFrame {
+  width: clamp(112px, 12vw, 172px);
 }
 
 .homeScatterFigure--two {
-  grid-column: 1 / -1;
-  grid-row: 2;
+  grid-column: 3 / -1;
+  grid-row: 5 / 9;
   justify-self: end;
-  margin-right: clamp(0px, 4vw, 52px);
+  align-self: center;
+  margin-right: clamp(12px, 4vw, 68px);
 }
 
-.homeScatterFigure--two .homeScatterImg {
-  max-height: min(30vh, 260px);
+.homeScatterFigure--two .homeScatterFrame {
+  width: clamp(230px, 32vw, 390px);
 }
 
 .homeScatterFigure--three {
-  grid-column: 1;
-  grid-row: 3;
+  grid-column: 1 / 7;
+  grid-row: 9 / -1;
   justify-self: start;
   align-self: end;
-  margin-bottom: clamp(0px, 2vh, 24px);
-  margin-left: clamp(0px, 2vw, 20px);
+  margin-left: clamp(0px, 1vw, 18px);
 }
 
-.homeScatterFigure--three .homeScatterImg {
-  max-height: min(22vh, 180px);
+.homeScatterFigure--three .homeScatterFrame {
+  width: clamp(190px, 25vw, 310px);
 }
 
 .floatingImages[data-active-image-set="proyectos"] .floatingImageStrip {
@@ -802,16 +857,6 @@ img {
 
 .floatingImages[data-active-image-set="acerca"] .floatingImageBlock {
   transform: translate3d(1vw, -1vh, 0) rotate(-2deg);
-}
-
-@keyframes menuPhotoBreath {
-  from {
-    opacity: 0.52;
-  }
-
-  to {
-    opacity: 0.68;
-  }
 }
 
 @media (max-width: 820px) {
@@ -869,6 +914,20 @@ img {
     margin-left: 0;
   }
 
+  .menuCodeSnippet {
+    font-size: clamp(7.5px, 2.1vw, 10px);
+    line-height: 1.28;
+    min-height: 4.5em;
+  }
+
+  .menuCodeSnippetTop {
+    margin-bottom: clamp(10px, 2vh, 18px);
+  }
+
+  .menuCodeSnippetBottom {
+    margin-top: clamp(14px, 2.4vh, 24px);
+  }
+
   .menuTitle {
     font-size: clamp(42px, 13vw, 72px);
   }
@@ -907,61 +966,62 @@ img {
   }
 
   .floatingImages[data-active-image-set="home"] {
-    top: 34%;
+    top: 48%;
     left: 0;
   }
 
   .homeScatter {
-    padding: clamp(10px, 2vh, 20px) clamp(10px, 3vw, 18px) clamp(14px, 3vh, 36px);
-    padding-left: clamp(8px, 3vw, 16px);
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    grid-template-rows: auto auto auto;
-    row-gap: clamp(10px, 2.2vh, 24px);
-    column-gap: clamp(10px, 2vw, 18px);
+    padding: clamp(4px, 1vh, 10px) clamp(8px, 2.5vw, 18px) clamp(14px, 3vh, 30px);
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-rows: repeat(6, minmax(0, 1fr));
   }
 
   .homeScatterFigure[data-caption-side="start"] {
-    grid-template-columns: auto minmax(0, min(38vw, 148px));
+    grid-template-columns: auto auto;
   }
 
   .homeScatterFigure[data-caption-side="end"] {
-    grid-template-columns: minmax(0, min(42vw, 168px)) auto;
+    grid-template-columns: auto auto;
+  }
+
+  .homeScatterLabel {
+    font-size: clamp(7px, 1.8vw, 9px);
+    letter-spacing: 0.08em;
   }
 
   .homeScatterFigure--one {
-    grid-column: 1;
-    grid-row: 1;
-    justify-self: start;
+    grid-column: 4 / -1;
+    grid-row: 1 / 4;
+    justify-self: end;
     margin-top: 0;
   }
 
-  .homeScatterFigure--one .homeScatterImg {
-    max-height: min(16vh, 124px);
+  .homeScatterFigure--one .homeScatterFrame {
+    width: clamp(78px, 24vw, 132px);
   }
 
   .homeScatterFigure--two {
-    grid-column: 2;
-    grid-row: 1 / span 2;
+    grid-column: 2 / -1;
+    grid-row: 3 / 6;
     justify-self: end;
     align-self: center;
     margin-right: 0;
   }
 
-  .homeScatterFigure--two .homeScatterImg {
-    max-height: min(22vh, 176px);
+  .homeScatterFigure--two .homeScatterFrame {
+    width: clamp(130px, 40vw, 240px);
   }
 
   .homeScatterFigure--three {
-    grid-column: 1;
-    grid-row: 2 / span 2;
+    grid-column: 1 / 4;
+    grid-row: 4 / -1;
     justify-self: start;
     align-self: end;
     margin-left: 0;
-    margin-bottom: 0;
   }
 
-  .homeScatterFigure--three .homeScatterImg {
-    max-height: min(15vh, 116px);
+  .homeScatterFigure--three .homeScatterFrame {
+    width: clamp(110px, 34vw, 190px);
   }
 
   .floatingImages[data-active-image-set="proyectos"] .floatingImageStrip {
@@ -1032,13 +1092,75 @@ img {
     font-size: 16px;
   }
 
+  .menuStage {
+    padding: 76px 12px 22px;
+  }
+
   .menuClose {
     width: 42px;
     height: 42px;
   }
 
+  .menuKicker {
+    margin-bottom: 14px;
+    gap: 10px;
+    font-size: 11px;
+  }
+
+  .menuKicker::before {
+    width: 28px;
+  }
+
+  .menuTitle {
+    font-size: clamp(38px, 12vw, 54px);
+    border-bottom-width: 3px;
+  }
+
+  .menuCopy {
+    max-width: 24ch;
+  }
+
   .enterButton {
     min-width: 126px;
+    min-height: 42px;
+    margin-top: 24px;
+    font-size: 20px;
+  }
+
+  .menuCodeSnippet {
+    font-size: clamp(6.8px, 1.9vw, 8px);
+    min-height: 4.35em;
+  }
+
+  .floatingImages[data-active-image-set="home"] {
+    top: 52%;
+  }
+
+  .homeScatter {
+    padding-inline: 6px 18px;
+  }
+
+  .homeScatterFigure--one .homeScatterFrame {
+    width: clamp(70px, 23vw, 98px);
+  }
+
+  .homeScatterFigure--two .homeScatterFrame {
+    width: clamp(112px, 38vw, 158px);
+  }
+
+  .homeScatterFigure--three .homeScatterFrame {
+    width: clamp(96px, 32vw, 132px);
+  }
+}
+
+@media (max-width: 520px) and (max-height: 700px) {
+  .floatingImages[data-active-image-set="home"] {
+    top: 60%;
+  }
+
+  .homeScatter {
+    transform: scale(0.82);
+    transform-origin: top right;
   }
 }
 
@@ -1053,22 +1175,14 @@ img {
   }
 }
 
-/* ─── Home Scatter System ─────────────────────────────────────── */
+/* ─── Home scatter: wires bajo fotos (layout en grid más arriba) ─ */
 
-/* Override floatingImages left-constraint for home */
 .homeScatterRoot {
   left: 0 !important;
   pointer-events: none;
-  isolation: isolate; /* Create new stacking context */
+  isolation: isolate;
 }
 
-.homeScatter {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-/* SVG canvas — always UNDER everything */
 .homeScatterWires {
   position: absolute;
   inset: 0;
@@ -1080,78 +1194,21 @@ img {
 }
 
 .homeScatterWire {
-  stroke: rgb(var(--accent-rgb) / 0.65);
+  stroke: rgb(var(--accent-rgb) / 0.55);
   stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
+  shape-rendering: geometricPrecision;
   fill: none;
-  stroke-dasharray: 6 5;
 }
 
-
-
-/* Photo figure — z-index 1 so it always covers wires */
-.homeScatterFigure {
-  position: absolute;
-  left: var(--sx);
-  top: var(--sy);
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 6px;
-  pointer-events: auto;
-  z-index: 1;
-  transition: filter 180ms ease;
-}
-
-.homeScatterFigure[data-caption-side="end"] {
-  align-items: flex-end;
-}
-
-.homeScatterFigure:hover .homeScatterFrame {
-  border-color: var(--accent);
+.homeScatterRoot .homeScatterFigure:hover {
+  z-index: 4;
 }
 
 .homeScatterFigure:hover .homeScatterPort {
   background: var(--accent);
 }
 
-.homeScatterFigure:hover {
-  z-index: 10;
-}
-
-/* Frame: variable dynamic proportions based on JS seed */
-.homeScatterFrame {
-  position: relative;
-  width: var(--size, 200px);
-  max-width: 100%;
-  border: 1px solid rgb(var(--accent-rgb) / 0.65);
-  flex-shrink: 0;
-  background: var(--bg);
-  transition: border-color 150ms ease;
-}
-
-/* Image fills frame at its natural ratio */
-.homeScatterImg {
-  display: block;
-  width: 100%;
-  height: auto;
-  filter: grayscale(1);
-  opacity: 1;
-  background-color: var(--bg);
-}
-
-/* Terminal label */
-.homeScatterLabel {
-  font-family: var(--font-mono);
-  font-size: clamp(9px, 0.9vw, 11px);
-  font-weight: 400;
-  letter-spacing: 0.1em;
-  color: rgb(var(--accent-rgb) / 0.7);
-  text-transform: uppercase;
-  line-height: 1;
-  white-space: nowrap;
-}
-
-/* Port connector dot — z-index 2 so it's above the photo */
 .homeScatterPort {
   position: absolute;
   width: 7px;
@@ -1162,24 +1219,21 @@ img {
   transition: background-color 150ms ease;
 }
 
-.homeScatterPort--br { bottom: -4px; right: -4px; }
-.homeScatterPort--tl { top: -4px; left: -4px; }
+.homeScatterPort--ml {
+  left: -4px;
+  top: 50%;
+  transform: translateY(-50%);
+}
 
 @media (max-width: 820px) {
-  .homeScatterFrame {
-    max-width: clamp(100px, 24vw, 160px);
+  .homeScatterWire {
+    stroke-width: 1.5px;
   }
 }
 
 @media (max-width: 520px) {
-  .homeScatterFrame {
-    max-width: clamp(80px, 28vw, 120px);
+  .homeScatterPort {
+    width: 6px;
+    height: 6px;
   }
 }
-
-@media (prefers-reduced-motion: reduce) {
-  .homeScatterWire {
-    animation: none;
-  }
-}
-
