@@ -3,3 +3,10 @@ export const visualAssets = {
   menuEyesStrip: "/assets/ojos.png",
   menuPhotoBlock: "/assets/menu-photo-block.webp"
 } as const;
+
+/** Fotos dispersas del menú cuando la sección activa es `home` (etiqueta = nombre de archivo sin extensión). */
+export const homeMenuScatterPhotos = [
+  { src: "/assets/home1.webp", label: "img:01", slot: "one",   captionSide: "start" },
+  { src: "/assets/home2.webp", label: "img:02", slot: "two",   captionSide: "end"   },
+  { src: "/assets/home3.webp", label: "img:03", slot: "three", captionSide: "start" }
+] as const;
