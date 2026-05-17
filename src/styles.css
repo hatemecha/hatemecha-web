@@ -457,11 +457,12 @@ img {
   text-align: center;
   text-transform: lowercase;
   transform: scale(var(--carousel-scale));
+  will-change: transform, opacity;
   transition:
-    background 170ms ease,
-    color 170ms ease,
-    opacity 220ms ease,
-    transform 220ms ease;
+    background-color 220ms cubic-bezier(0.16, 1, 0.3, 1),
+    color 220ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 260ms ease,
+    transform 320ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .menuRailItem:hover:not([aria-selected="true"]),
@@ -481,6 +482,7 @@ img {
 .menuControlsHint {
   justify-self: center;
   width: 100%;
+  min-height: 1.4em;
   max-width: calc(var(--rail-width) - 10px);
   margin: 0 clamp(5px, 1vw, 10px) clamp(12px, 2vh, 22px);
   padding: 0.35em 0.2em;
@@ -495,6 +497,7 @@ img {
   text-align: center;
   text-transform: uppercase;
   box-shadow: none;
+  contain: layout paint;
 }
 
 .menuStage {
@@ -1557,10 +1560,12 @@ img {
 
   .galleryPage {
     padding: clamp(78px, 11vh, 108px) 10px 34px;
+    background-attachment: scroll, scroll;
   }
 
   .projectsPage {
     padding: clamp(108px, 15vh, 138px) 12px 34px;
+    background-attachment: scroll, scroll;
   }
 
   .galleryHeader {

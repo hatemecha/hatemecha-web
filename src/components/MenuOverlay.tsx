@@ -194,7 +194,7 @@ export function MenuOverlay({
           text="↑↓ ←→ · WASD · rueda"
           active={isOpen}
           delay={220}
-          replayKey={`${activeSection.id}-${isOpen ? "open" : "closed"}`}
+          replayKey={isOpen ? "menu-controls-open" : "menu-controls-closed"}
           data-menu-in
         />
       </div>

@@ -39,6 +39,7 @@ function animateCodeRange(
   delay: number
 ) {
   const typing = { chars: from };
+  let lastCharCount = -1;
 
   return animate(typing, {
     chars: to,
@@ -46,7 +47,11 @@ function animateCodeRange(
     delay,
     ease: "linear",
     onUpdate: () => {
-      element.textContent = code.slice(0, Math.floor(typing.chars));
+      const charCount = Math.floor(typing.chars);
+      if (charCount === lastCharCount) return;
+
+      lastCharCount = charCount;
+      element.textContent = code.slice(0, charCount);
     },
     onComplete: () => {
       element.textContent = code.slice(0, to);

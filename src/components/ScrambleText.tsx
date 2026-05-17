@@ -51,6 +51,7 @@ export function ScrambleText({ active = true, delay = 0, replayKey, text, ...pro
     }
 
     let frame = 0;
+    let lastRevealedCount = -1;
     const state = { chars: 0 };
     textElement.textContent = "";
     textElement.setAttribute("aria-label", text);
@@ -61,8 +62,12 @@ export function ScrambleText({ active = true, delay = 0, replayKey, text, ...pro
       duration: getTextDuration(text),
       ease: "out(3)",
       onUpdate: () => {
+        const revealedCount = Math.floor(state.chars);
+        if (revealedCount === lastRevealedCount) return;
+
+        lastRevealedCount = revealedCount;
         frame += 1;
-        textElement.textContent = buildScrambledText(text, Math.floor(state.chars), frame);
+        textElement.textContent = buildScrambledText(text, revealedCount, frame);
       },
       onComplete: () => {
         textElement.textContent = text;
