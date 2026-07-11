@@ -34,8 +34,7 @@ type MenuOverlayProps = {
   isOpen: boolean;
   onSelectSection: (index: number) => void;
   onCloseMenu: () => void;
-  onOpenGallery: () => void;
-  onOpenProjects: () => void;
+  onEnterSection: () => void;
 };
 
 export function MenuOverlay({
@@ -45,8 +44,7 @@ export function MenuOverlay({
   isOpen,
   onSelectSection,
   onCloseMenu,
-  onOpenGallery,
-  onOpenProjects
+  onEnterSection
 }: MenuOverlayProps) {
   const codeTopRef = useRef<HTMLPreElement>(null);
   const codeBottomRef = useRef<HTMLPreElement>(null);
@@ -70,20 +68,6 @@ export function MenuOverlay({
   }, [activeIndex, sections]);
 
   useMenuPanelCodeTyping(isOpen, activeSection.id, codeTopRef, codeBottomRef);
-
-  const enterActiveSection = () => {
-    if (activeSection.id === "galeria") {
-      onOpenGallery();
-      return;
-    }
-
-    if (activeSection.id === "proyectos") {
-      onOpenProjects();
-      return;
-    }
-
-    onCloseMenu();
-  };
 
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -239,7 +223,7 @@ export function MenuOverlay({
             className="enterButton"
             type="button"
             aria-label={`Entrar en ${activeSection.label}`}
-            onClick={enterActiveSection}
+            onClick={onEnterSection}
             data-menu-in
           >
             enter

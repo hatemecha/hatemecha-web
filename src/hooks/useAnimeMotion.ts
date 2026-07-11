@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import { animate } from "animejs/animation";
 
+/** Hero/menu enter + arrow pulse via animejs. Page/view transitions use Motion presets. */
 export function useAnimeMotion(isMenuOpen: boolean, menuMotionKey: number) {
   const heroRef = useRef<HTMLElement>(null);
   const menuRef = useRef<HTMLElement>(null);

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { PortfolioSectionId } from "../data/portfolioSections";
 import { homeMenuScatterPhotos, visualAssets } from "../data/assets";
+import { requirePhotoAspectRatio } from "../utils/aspectRatio";
 
 type FloatingImagesProps = { activeId: PortfolioSectionId };
 
@@ -23,14 +24,6 @@ function getFrameRect(frame: HTMLElement, containerRect: DOMRect): Rect {
     w: frameRect.width,
     h: frameRect.height
   };
-}
-
-function getPhotoAspectRatio(width: number, height: number) {
-  if (width <= 0 || height <= 0) {
-    throw new Error(`Photo dimensions must be positive. Received: ${width}x${height}.`);
-  }
-
-  return `${width} / ${height}`;
 }
 
 function buildWirePaths(rects: Rect[], stageW: number, stageH: number): string[] {
@@ -122,14 +115,14 @@ export function FloatingImages({ activeId }: FloatingImagesProps) {
             {item.captionSide === "start" ? (
               <>
                 <figcaption className="homeScatterLabel">{item.label}</figcaption>
-                <div className="homeScatterFrame" style={{ aspectRatio: getPhotoAspectRatio(item.width, item.height) }}>
+                <div className="homeScatterFrame" style={{ aspectRatio: requirePhotoAspectRatio(item.width, item.height) }}>
                   <img className="homeScatterImg" src={item.src} alt="" draggable="false" loading={idx === 0 ? "eager" : "lazy"} />
                   <span className="homeScatterPort homeScatterPort--ml" aria-hidden="true" />
                 </div>
               </>
             ) : (
               <>
-                <div className="homeScatterFrame" style={{ aspectRatio: getPhotoAspectRatio(item.width, item.height) }}>
+                <div className="homeScatterFrame" style={{ aspectRatio: requirePhotoAspectRatio(item.width, item.height) }}>
                   <img className="homeScatterImg" src={item.src} alt="" draggable="false" loading={idx === 0 ? "eager" : "lazy"} />
                   <span className="homeScatterPort homeScatterPort--ml" aria-hidden="true" />
                 </div>

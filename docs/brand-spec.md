@@ -12,9 +12,9 @@
   --accent:   oklch(61% 0.28 29);
   --accent-rgb: 255 0 0;
 
-  --font-display: 'Impact', 'Arial Black', 'Haettenschweiler', 'Anton', sans-serif;
+  --font-display: 'Bebas Neue', 'Impact', 'Arial Black', sans-serif;
   --font-body:    'Aptos', 'Segoe UI', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  --font-mono:    'Cascadia Mono', 'SFMono-Regular', Consolas, ui-monospace, monospace;
+  --font-mono:    'Share Tech Mono', 'Cascadia Mono', 'SFMono-Regular', Consolas, ui-monospace, monospace;
 }
 ```
 

@@ -4,11 +4,10 @@ colors:
   bg: "oklch(8% 0.006 260)"
   surface: "oklch(12% 0.006 260)"
   fg: "oklch(96% 0.006 95)"
-  muted: "oklch(70% 0.008 95)"
+  muted: "oklch(76% 0.008 95)"
   border: "oklch(84% 0.008 95)"
   accent: "oklch(61% 0.28 29)"
   ink: "oklch(4% 0.004 260)"
-  muted: "oklch(76% 0.008 95)"
 typography:
   display:
     fontFamily: "Bebas Neue, Impact, Arial Black, sans-serif"
@@ -19,7 +18,7 @@ typography:
     fontWeight: "700"
     lineHeight: "1.28"
   mono:
-    fontFamily: "Cascadia Mono, monospace"
+    fontFamily: "Share Tech Mono, Cascadia Mono, monospace"
     fontWeight: "850"
 spacing:
   rail-width: "clamp(190px, 24vw, 330px)"
@@ -44,11 +43,11 @@ The palette is rooted in deep, inky neutrals and a high-voltage accent. We use *
 
 ## Typography
 
-The system runs a strict split between industrial display and functional technical type.
+Runtime source of truth: `src/styles/tokens.css` and Google Fonts in `index.html`.
 
-- **Display (`{typography.display}`):** Impact at heavy weights. Used for the main brand and section headers. Command and authority.
-- **Body (`{typography.body}`):** Aptos/System. Used for descriptive copy and journalistic fragments. High legibility.
-- **Mono (`{typography.mono}`):** Cascadia Mono. Used for navigation, UI hints, and tactical metadata.
+- **Display (`{typography.display}`):** Bebas Neue (Impact fallback). Used for the main brand and section headers.
+- **Body (`{typography.body}`):** Aptos/System. Used for descriptive copy.
+- **Mono (`{typography.mono}`):** Share Tech Mono (Cascadia fallback). Used for navigation, UI hints, and tactical metadata.
 
 ## Layout & Components
 

@@ -1,0 +1,225 @@
+.hero {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  min-height: 100svh;
+  place-items: center;
+  padding: clamp(18px, 4vw, 68px);
+  transition:
+    opacity 720ms ease,
+    transform 920ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.appShell[data-menu-open="true"] .hero {
+  opacity: 0;
+  transform: translateY(9vh) scale(0.975);
+  pointer-events: none;
+}
+
+.heroLockup {
+  display: grid;
+  justify-items: center;
+  width: min(88vw, 920px);
+  transform: translateY(-5vh);
+}
+
+.heroTopBar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 4;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: clamp(26px, 5vw, 40px);
+  padding-top: max(env(safe-area-inset-top, 0px), clamp(12px, 2.5vh, 24px));
+  padding-bottom: clamp(10px, 1.8vh, 18px);
+  padding-inline: clamp(20px, 5vw, 48px);
+  color: var(--accent);
+  pointer-events: none;
+}
+
+.heroSocialLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  color: inherit;
+  line-height: 0;
+  pointer-events: auto;
+  opacity: 0.94;
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.heroSocialLink:hover,
+.heroSocialLink:focus-visible {
+  opacity: 1;
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.heroSocialIcon {
+  display: block;
+  width: clamp(30px, 4.8vw, 42px);
+  height: clamp(30px, 4.8vw, 42px);
+}
+
+.brandTitle {
+  display: flex;
+  max-width: 100%;
+  margin: 0;
+  gap: var(--signal-slot-gap);
+  justify-content: center;
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-size: clamp(54px, 12.2vw, 170px);
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 0.72;
+  text-align: center;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.brandWord {
+  display: inline-block;
+  flex: 0 0 auto;
+}
+
+.signalSlots {
+  display: grid;
+  grid-template-columns: var(--hate-slot-width) var(--mecha-slot-width);
+  gap: var(--signal-slot-gap);
+  margin-top: clamp(7px, 1.05vw, 12px);
+  max-width: 100%;
+}
+
+.signalSlot {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  height: clamp(27px, 2.55vw, 39px);
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgb(var(--accent-rgb) / 0.78);
+  background: oklch(0% 0 0 / 0.16);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: clamp(10px, 1.05vw, 14px);
+  font-weight: 800;
+  line-height: 1;
+  text-transform: uppercase;
+  transition:
+    background 180ms ease,
+    color 180ms ease,
+    transform 180ms ease,
+    border-color 180ms ease;
+}
+
+.signalSlot img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  opacity: 0.22;
+  filter: grayscale(1) contrast(1.28);
+  mix-blend-mode: luminosity;
+  transition: opacity 180ms ease, filter 180ms ease;
+}
+
+.signalSlot span {
+  position: relative;
+  z-index: 1;
+  max-width: 96%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.signalSlot:hover,
+.signalSlot:focus-visible {
+  background: oklch(0% 0 0 / 0.34);
+  color: var(--accent);
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.signalSlot:hover img,
+.signalSlot:focus-visible img {
+  opacity: 0.38;
+  filter: grayscale(0.65) contrast(1.14);
+}
+
+.signalSlotEyes img,
+.signalSlotBarcode img {
+  opacity: 1;
+  filter: none;
+  mix-blend-mode: normal;
+}
+
+.signalSlotEyes:hover img,
+.signalSlotEyes:focus-visible img,
+.signalSlotBarcode:hover img,
+.signalSlotBarcode:focus-visible img {
+  opacity: 1;
+  filter: none;
+}
+
+.menuArrow {
+  position: fixed;
+  left: 50%;
+  bottom: clamp(26px, 9vh, 86px);
+  z-index: 2;
+  display: grid;
+  width: 64px;
+  height: 96px;
+  place-items: center;
+  background: transparent;
+  color: var(--fg);
+  translate: -50% 0;
+  transition:
+    color 180ms ease,
+    opacity 220ms ease;
+}
+
+.menuArrow:hover,
+.menuArrow:focus-visible {
+  color: var(--accent);
+  outline: none;
+}
+
+.menuArrowGlyph {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 72px;
+  transition: translate 260ms cubic-bezier(0.16, 1, 0.3, 1);
+  animation: arrowIdle 1.9s ease-in-out infinite;
+}
+
+.menuArrowSvg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.menuArrow:hover .menuArrowGlyph,
+.menuArrow:focus-visible .menuArrowGlyph {
+  translate: 0 7px;
+}
+
+@keyframes arrowIdle {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 7px;
+  }
+}

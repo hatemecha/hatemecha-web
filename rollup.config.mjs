@@ -10,6 +10,7 @@ import { fileURLToPath } from "node:url";
 const rootDirectory = path.dirname(fileURLToPath(import.meta.url));
 const distDirectory = path.join(rootDirectory, "dist");
 const distAssetsDirectory = path.join(distDirectory, "assets");
+const stylesEntryPath = path.join(rootDirectory, "src", "styles.css");
 
 function ignoreCssImports() {
   return {
@@ -51,6 +52,33 @@ function buildProductionHtml(sourceHtml) {
   );
 }
 
+async function bundleStylesheet(entryPath, seen = new Set()) {
+  const resolvedPath = path.resolve(entryPath);
+
+  if (seen.has(resolvedPath)) {
+    return "";
+  }
+
+  seen.add(resolvedPath);
+
+  const source = await readFile(resolvedPath, "utf8");
+  const directory = path.dirname(resolvedPath);
+  const importPattern = /@import\s+["']([^"']+)["']\s*;/g;
+  let output = "";
+  let lastIndex = 0;
+  let match = importPattern.exec(source);
+
+  while (match) {
+    output += source.slice(lastIndex, match.index);
+    output += await bundleStylesheet(path.resolve(directory, match[1]), seen);
+    lastIndex = match.index + match[0].length;
+    match = importPattern.exec(source);
+  }
+
+  output += source.slice(lastIndex);
+  return output;
+}
+
 function copyStaticAssets() {
   return {
     name: "copy-static-assets",
@@ -76,9 +104,23 @@ function copyStaticAssets() {
         });
       }
 
-      await cp(path.join(rootDirectory, "src", "styles.css"), path.join(distAssetsDirectory, "app.css"), {
-        force: true
-      });
+      const bundledCss = await bundleStylesheet(stylesEntryPath);
+      await writeFile(path.join(distAssetsDirectory, "app.css"), bundledCss);
+
+      const robotsSource = path.join(rootDirectory, "public", "robots.txt");
+      const sitemapSource = path.join(rootDirectory, "public", "sitemap.xml");
+
+      try {
+        await cp(robotsSource, path.join(distDirectory, "robots.txt"), { force: true });
+      } catch {
+        // optional
+      }
+
+      try {
+        await cp(sitemapSource, path.join(distDirectory, "sitemap.xml"), { force: true });
+      } catch {
+        // optional
+      }
 
       const sourceHtml = await readFile(path.join(rootDirectory, "index.html"), "utf8");
       const productionHtml = buildProductionHtml(sourceHtml);
