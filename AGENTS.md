@@ -24,6 +24,7 @@ Portfolio SPA (React 19 + TypeScript + Vite). Production build uses **Rollup**, 
 - Gallery source (gitignored): `!PORTFOLIO/` — drop JPEGs/WebP/etc. here, then `npm run gallery:sync`.
 - Generated: `public/galeria/masters/` (~2400px WebP), `public/galeria/thumbs/` (~420px WebP), `src/data/galleryManifest.ts`.
 - Projects: `src/data/projects.ts`.
+- Project screenshots (source): `screenshots/` → convert/copy WebP into `public/assets/projects/` and list paths in `projects.ts` (`images`).
 - Section copy / rail: `src/data/portfolioSections.ts`.
 
 ## Design source of truth

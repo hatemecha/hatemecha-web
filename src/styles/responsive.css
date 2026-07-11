@@ -251,11 +251,32 @@
     font-size: 16px;
   }
 
-  .projectRow {
-    min-height: 0;
-    aspect-ratio: auto;
-    gap: 22px;
-    padding: 18px;
+  .projectRow,
+  .projectRow[data-media-side="end"] {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "media"
+      "body";
+    gap: 16px;
+    padding: 20px 0;
+  }
+
+  .projectMedia::after {
+    width: 36px;
+  }
+
+  .projectRow[data-media-side="end"] .projectMedia::after {
+    left: auto;
+    right: 0;
+    background: linear-gradient(90deg, transparent, oklch(0% 0 0 / 0.72));
+  }
+
+  .projectShot {
+    flex-basis: 88cqi;
+  }
+
+  .projectBody {
+    padding-block: 0;
   }
 
   .projectTitle {
@@ -263,11 +284,16 @@
   }
 
   .projectDescription {
+    max-width: none;
     font-size: clamp(12px, 3.2vw, 16px);
   }
 
   .projectActions {
     width: 100%;
+  }
+
+  .projectActions a {
+    flex: 1;
   }
 
   .galleryRevealGrid {
