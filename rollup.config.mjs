@@ -40,14 +40,14 @@ function buildProductionHtml(sourceHtml) {
   const htmlWithEntryScript = replaceRequired(
     sourceHtml,
     /<script\b(?=[^>]*\btype=(["'])module\1)(?=[^>]*\bsrc=(["'])\/src\/main\.tsx\2)[^>]*>\s*<\/script>/,
-    '    <script type="module" src="/assets/app.js"></script>',
+    '    <script type="module" src="assets/app.js"></script>',
     "source entry script"
   );
 
   return replaceRequired(
     htmlWithEntryScript,
     /<\/head>/i,
-    '    <link rel="stylesheet" href="/assets/app.css" />\n  </head>',
+    '    <link rel="stylesheet" href="assets/app.css" />\n  </head>',
     "closing head tag"
   );
 }
@@ -104,7 +104,12 @@ function copyStaticAssets() {
         });
       }
 
-      const bundledCss = await bundleStylesheet(stylesEntryPath);
+      // Source CSS uses root-absolute `/assets/...` for Vite; rewrite to
+      // same-directory relatives so dist/assets/app.css works under /hatemecha-web/.
+      const bundledCss = (await bundleStylesheet(stylesEntryPath)).replaceAll(
+        'url("/assets/',
+        'url("./'
+      );
       await writeFile(path.join(distAssetsDirectory, "app.css"), bundledCss);
 
       const robotsSource = path.join(rootDirectory, "public", "robots.txt");

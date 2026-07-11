@@ -14,7 +14,8 @@ const MASTER_MAX_EDGE = 2400;
 const THUMB_WIDTH = 420;
 
 function getPublicUrl(...segments) {
-  return `/${segments.map((segment) => encodeURIComponent(segment)).join("/")}`;
+  // Relative (no leading slash) so GitHub Pages project base `/hatemecha-web/` resolves correctly.
+  return segments.map((segment) => encodeURIComponent(segment)).join("/");
 }
 
 function getStableId(filename) {
@@ -94,6 +95,14 @@ async function getSourceFiles() {
 
 async function syncGallery() {
   const files = await getSourceFiles();
+
+  if (files.length === 0) {
+    console.log(
+      "gallery: no images in !PORTFOLIO — keeping committed public/galeria assets and galleryManifest.ts"
+    );
+    return;
+  }
+
   const items = [];
 
   for (const filename of files) {
