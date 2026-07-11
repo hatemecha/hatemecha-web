@@ -1,28 +1,62 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 import { motion } from "motion/react";
-import { galleryItems, type GalleryItem } from "../data/galleryManifest";
-import { pageContentVariants, pageItemVariants } from "../motion/presets";
-import { getPhotoAspectRatio } from "../utils/aspectRatio";
-import { PortfolioPageShell } from "./PortfolioPageShell";
-import { ScrambleText } from "./ScrambleText";
+import { galleryItems } from "../data/galleryManifest";
+import { useLenisScroll } from "../hooks/useLenisScroll";
 
 type GalleryPageProps = {
   onBackToMenu: () => void;
 };
 
-function getItemSpan(item: GalleryItem, index: number) {
-  const ratio = item.width / item.height;
+const fluidEase = [0.22, 1, 0.36, 1] as const;
 
-  if (ratio > 1.62) return "wide";
-  if (ratio < 0.74) return "tall";
-  if (index % 11 === 0) return "large";
-  return "standard";
+const gridVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      duration: 0.5,
+      ease: fluidEase,
+      staggerChildren: 0.018,
+      delayChildren: 0.12
+    }
+  }
+} as const;
+
+const tileVariants = {
+  hidden: { opacity: 0, scale: 0.96 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.55, ease: fluidEase }
+  }
+} as const;
+
+function findNearestTileIndex(clientX: number, clientY: number, tiles: HTMLElement[]) {
+  let nearestIndex = -1;
+  let nearestDistance = Number.POSITIVE_INFINITY;
+
+  tiles.forEach((tile, index) => {
+    const rect = tile.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const distance = (clientX - centerX) ** 2 + (clientY - centerY) ** 2;
+
+    if (distance < nearestDistance) {
+      nearestDistance = distance;
+      nearestIndex = index;
+    }
+  });
+
+  return nearestIndex;
 }
 
 export function GalleryPage({ onBackToMenu }: GalleryPageProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [hotIndex, setHotIndex] = useState<number | null>(null);
+  const [lockupFaded, setLockupFaded] = useState(false);
+  const pageRef = useLenisScroll<HTMLElement>();
+  const gridRef = useRef<HTMLDivElement>(null);
   const activeItem = activeIndex === null ? null : galleryItems[activeIndex] ?? null;
-  const itemCountLabel = `${galleryItems.length} img${galleryItems.length === 1 ? "" : "s"}`;
 
   const lightboxLabel = useMemo(() => {
     if (activeIndex === null || !activeItem) return undefined;
@@ -37,6 +71,39 @@ export function GalleryPage({ onBackToMenu }: GalleryPageProps) {
 
     onBackToMenu();
   }, [activeIndex, onBackToMenu]);
+
+  const handleTileActivate = useCallback(
+    (index: number) => {
+      const canHover = window.matchMedia("(hover: hover)").matches;
+
+      if (!canHover && hotIndex !== index) {
+        setHotIndex(index);
+        return;
+      }
+
+      setActiveIndex(index);
+    },
+    [hotIndex]
+  );
+
+  const handleGridPointerMove = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+
+    const grid = gridRef.current;
+    if (!grid) return;
+
+    const tiles = Array.from(grid.querySelectorAll<HTMLElement>("[data-gallery-tile]"));
+    if (tiles.length === 0) return;
+
+    const nearestIndex = findNearestTileIndex(event.clientX, event.clientY, tiles);
+    setHotIndex((current) => (current === nearestIndex ? current : nearestIndex));
+    setLockupFaded(true);
+  }, []);
+
+  const handleGridPointerLeave = useCallback(() => {
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    setHotIndex(null);
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -74,50 +141,92 @@ export function GalleryPage({ onBackToMenu }: GalleryPageProps) {
 
   return (
     <>
-      <PortfolioPageShell
-        className="galleryPage"
-        titleId="gallery-title"
-        title="galeria"
-        kicker="ギャラリー"
-        meta={<span className="galleryCount">{itemCountLabel}</span>}
-        onBackToMenu={onBackToMenu}
-        escapeEnabled={false}
-      >
-        {galleryItems.length > 0 ? (
-          <motion.div className="galleryGrid" aria-label="Fotos de galeria" variants={pageContentVariants}>
-            {galleryItems.map((item, index) => (
-              <motion.button
-                className="galleryTile"
-                type="button"
-                key={item.id}
-                data-span={getItemSpan(item, index)}
-                onClick={() => setActiveIndex(index)}
-                style={{ aspectRatio: getPhotoAspectRatio(item.width, item.height) }}
-                variants={pageItemVariants}
-              >
-                <img
-                  className="galleryThumb"
-                  src={item.thumbSrc}
-                  alt={item.alt || item.filename}
-                  width={item.width}
-                  height={item.height}
-                  draggable="false"
-                  decoding="async"
-                  loading={index < 4 ? "eager" : "lazy"}
-                />
-                <span className="galleryTileIndex" aria-hidden="true">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-              </motion.button>
-            ))}
+      <section className="galleryRevealPage" aria-labelledby="gallery-title" ref={pageRef}>
+        <a className="skipLink" href="#gallery-title">
+          Saltar al contenido
+        </a>
+
+        <button className="galleryMenuButton" type="button" onClick={onBackToMenu}>
+          menu
+        </button>
+
+        <div className="galleryLockupAnchor">
+          <motion.div
+            className="galleryLockup"
+            data-faded={lockupFaded ? "true" : undefined}
+            initial={{ opacity: 0, y: 28, filter: "blur(8px)" }}
+            animate={{
+              opacity: lockupFaded ? 0 : 1,
+              y: lockupFaded ? -16 : 0,
+              filter: lockupFaded ? "blur(12px)" : "blur(0px)",
+              scale: lockupFaded ? 0.96 : 1
+            }}
+            transition={{ duration: 0.6, ease: fluidEase }}
+            onMouseEnter={() => setLockupFaded(true)}
+            aria-hidden={lockupFaded || undefined}
+          >
+            <h1 id="gallery-title" className="galleryLockupTitle">
+              GALERIA
+            </h1>
+            <p className="galleryLockupJp" lang="ja">
+              ギャラリー
+            </p>
           </motion.div>
-        ) : (
-          <motion.div className="galleryEmpty" role="status" variants={pageItemVariants}>
-            <ScrambleText className="galleryEmptyCode" text="/public/galeria/originales" delay={120} />
-            <ScrambleText text="subi fotos a la carpeta y corre `npm run gallery:sync`." delay={260} />
-          </motion.div>
-        )}
-      </PortfolioPageShell>
+        </div>
+
+        <motion.div
+          className="smoothPageContent galleryRevealContent"
+          data-lenis-content
+          initial="hidden"
+          animate="visible"
+          variants={gridVariants}
+        >
+          {galleryItems.length > 0 ? (
+            <motion.div
+              className="galleryRevealGrid"
+              aria-label="Fotos de galeria"
+              ref={gridRef}
+              variants={gridVariants}
+              onPointerMove={handleGridPointerMove}
+              onPointerLeave={handleGridPointerLeave}
+              style={
+                {
+                  "--gallery-count": String(galleryItems.length)
+                } as CSSProperties
+              }
+            >
+              {galleryItems.map((item, index) => (
+                <motion.button
+                  className="galleryRevealTile"
+                  type="button"
+                  key={item.id}
+                  data-gallery-tile=""
+                  data-hot={hotIndex === index ? "true" : undefined}
+                  onClick={() => handleTileActivate(index)}
+                  onFocus={() => setHotIndex(index)}
+                  variants={tileVariants}
+                >
+                  <img
+                    className="galleryRevealThumb"
+                    src={item.thumbSrc}
+                    alt={item.alt || item.filename}
+                    width={item.width}
+                    height={item.height}
+                    draggable="false"
+                    decoding="async"
+                    loading={index < 12 ? "eager" : "lazy"}
+                  />
+                </motion.button>
+              ))}
+            </motion.div>
+          ) : (
+            <motion.div className="galleryEmpty" role="status" variants={tileVariants}>
+              <p className="galleryEmptyCode">!PORTFOLIO</p>
+              <p>agregá fotos a la carpeta y corré `npm run gallery:sync`.</p>
+            </motion.div>
+          )}
+        </motion.div>
+      </section>
 
       {activeItem ? (
         <div className="galleryLightbox" role="dialog" aria-modal="true" aria-label={lightboxLabel}>

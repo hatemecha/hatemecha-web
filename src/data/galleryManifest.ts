@@ -9,4 +9,401 @@ export type GalleryItem = {
   filename: string;
 };
 
-export const galleryItems: GalleryItem[] = [];
+export const galleryItems: GalleryItem[] = [
+  {
+    "id": "33bdaebab7",
+    "src": "/galeria/masters/011-33bdaebab7.webp",
+    "thumbSrc": "/galeria/thumbs/011-33bdaebab7.webp",
+    "width": 2400,
+    "height": 1600,
+    "alt": "011",
+    "filename": "011.JPG"
+  },
+  {
+    "id": "c3c17aaea0",
+    "src": "/galeria/masters/014-c3c17aaea0.webp",
+    "thumbSrc": "/galeria/thumbs/014-c3c17aaea0.webp",
+    "width": 2400,
+    "height": 1600,
+    "alt": "014",
+    "filename": "014.JPG"
+  },
+  {
+    "id": "7f4de12681",
+    "src": "/galeria/masters/019-7f4de12681.webp",
+    "thumbSrc": "/galeria/thumbs/019-7f4de12681.webp",
+    "width": 2400,
+    "height": 1600,
+    "alt": "019",
+    "filename": "019.JPG"
+  },
+  {
+    "id": "a29eff25c2",
+    "src": "/galeria/masters/021-a29eff25c2.webp",
+    "thumbSrc": "/galeria/thumbs/021-a29eff25c2.webp",
+    "width": 2400,
+    "height": 1600,
+    "alt": "021",
+    "filename": "021.JPG"
+  },
+  {
+    "id": "0732b08c39",
+    "src": "/galeria/masters/023-0732b08c39.webp",
+    "thumbSrc": "/galeria/thumbs/023-0732b08c39.webp",
+    "width": 1600,
+    "height": 2400,
+    "alt": "023",
+    "filename": "023.JPG"
+  },
+  {
+    "id": "0766d71cb7",
+    "src": "/galeria/masters/027-0766d71cb7.webp",
+    "thumbSrc": "/galeria/thumbs/027-0766d71cb7.webp",
+    "width": 1600,
+    "height": 2400,
+    "alt": "027",
+    "filename": "027.JPG"
+  },
+  {
+    "id": "40d561c150",
+    "src": "/galeria/masters/037-40d561c150.webp",
+    "thumbSrc": "/galeria/thumbs/037-40d561c150.webp",
+    "width": 2400,
+    "height": 1600,
+    "alt": "037",
+    "filename": "037.JPG"
+  },
+  {
+    "id": "03e2ca7304",
+    "src": "/galeria/masters/042-03e2ca7304.webp",
+    "thumbSrc": "/galeria/thumbs/042-03e2ca7304.webp",
+    "width": 746,
+    "height": 1119,
+    "alt": "042",
+    "filename": "042.JPG"
+  },
+  {
+    "id": "e1d297e2fc",
+    "src": "/galeria/masters/046-2-e1d297e2fc.webp",
+    "thumbSrc": "/galeria/thumbs/046-2-e1d297e2fc.webp",
+    "width": 2400,
+    "height": 1600,
+    "alt": "046 (2)",
+    "filename": "046 (2).JPG"
+  },
+  {
+    "id": "6a297ecd86",
+    "src": "/galeria/masters/046-6a297ecd86.webp",
+    "thumbSrc": "/galeria/thumbs/046-6a297ecd86.webp",
+    "width": 1600,
+    "height": 2400,
+    "alt": "046",
+    "filename": "046.JPG"
+  },
+  {
+    "id": "3133b0940c",
+    "src": "/galeria/masters/055-3133b0940c.webp",
+    "thumbSrc": "/galeria/thumbs/055-3133b0940c.webp",
+    "width": 2400,
+    "height": 1600,
+    "alt": "055",
+    "filename": "055.JPG"
+  },
+  {
+    "id": "e14e405520",
+    "src": "/galeria/masters/057-2-e14e405520.webp",
+    "thumbSrc": "/galeria/thumbs/057-2-e14e405520.webp",
+    "width": 1600,
+    "height": 2400,
+    "alt": "057 (2)",
+    "filename": "057 (2).JPG"
+  },
+  {
+    "id": "8980b12cd5",
+    "src": "/galeria/masters/057-8980b12cd5.webp",
+    "thumbSrc": "/galeria/thumbs/057-8980b12cd5.webp",
+    "width": 2400,
+    "height": 1600,
+    "alt": "057",
+    "filename": "057.JPG"
+  },
+  {
+    "id": "1b624a422b",
+    "src": "/galeria/masters/059-1b624a422b.webp",
+    "thumbSrc": "/galeria/thumbs/059-1b624a422b.webp",
+    "width": 1600,
+    "height": 2400,
+    "alt": "059",
+    "filename": "059.JPG"
+  },
+  {
+    "id": "95e2c385a7",
+    "src": "/galeria/masters/074-95e2c385a7.webp",
+    "thumbSrc": "/galeria/thumbs/074-95e2c385a7.webp",
+    "width": 2400,
+    "height": 1600,
+    "alt": "074",
+    "filename": "074.JPG"
+  },
+  {
+    "id": "06e5b946d1",
+    "src": "/galeria/masters/078-06e5b946d1.webp",
+    "thumbSrc": "/galeria/thumbs/078-06e5b946d1.webp",
+    "width": 2400,
+    "height": 1600,
+    "alt": "078",
+    "filename": "078.JPG"
+  },
+  {
+    "id": "f3d6e1ad7b",
+    "src": "/galeria/masters/081-f3d6e1ad7b.webp",
+    "thumbSrc": "/galeria/thumbs/081-f3d6e1ad7b.webp",
+    "width": 1600,
+    "height": 2400,
+    "alt": "081",
+    "filename": "081.JPG"
+  },
+  {
+    "id": "7a24a2ec8e",
+    "src": "/galeria/masters/085-7a24a2ec8e.webp",
+    "thumbSrc": "/galeria/thumbs/085-7a24a2ec8e.webp",
+    "width": 1600,
+    "height": 2400,
+    "alt": "085",
+    "filename": "085.JPG"
+  },
+  {
+    "id": "fdf0edf5dd",
+    "src": "/galeria/masters/099-fdf0edf5dd.webp",
+    "thumbSrc": "/galeria/thumbs/099-fdf0edf5dd.webp",
+    "width": 2400,
+    "height": 1600,
+    "alt": "099",
+    "filename": "099.JPG"
+  },
+  {
+    "id": "30acf3ed37",
+    "src": "/galeria/masters/101-30acf3ed37.webp",
+    "thumbSrc": "/galeria/thumbs/101-30acf3ed37.webp",
+    "width": 2400,
+    "height": 1600,
+    "alt": "101",
+    "filename": "101.JPG"
+  },
+  {
+    "id": "b5c8c016bb",
+    "src": "/galeria/masters/109-b5c8c016bb.webp",
+    "thumbSrc": "/galeria/thumbs/109-b5c8c016bb.webp",
+    "width": 2400,
+    "height": 1600,
+    "alt": "109",
+    "filename": "109.JPG"
+  },
+  {
+    "id": "2d75f4936c",
+    "src": "/galeria/masters/110-2d75f4936c.webp",
+    "thumbSrc": "/galeria/thumbs/110-2d75f4936c.webp",
+    "width": 2400,
+    "height": 1600,
+    "alt": "110",
+    "filename": "110.JPG"
+  },
+  {
+    "id": "377c5a230f",
+    "src": "/galeria/masters/114-377c5a230f.webp",
+    "thumbSrc": "/galeria/thumbs/114-377c5a230f.webp",
+    "width": 2400,
+    "height": 1600,
+    "alt": "114",
+    "filename": "114.JPG"
+  },
+  {
+    "id": "a85dc254d8",
+    "src": "/galeria/masters/116-a85dc254d8.webp",
+    "thumbSrc": "/galeria/thumbs/116-a85dc254d8.webp",
+    "width": 2400,
+    "height": 1600,
+    "alt": "116",
+    "filename": "116.JPG"
+  },
+  {
+    "id": "4241c0ef73",
+    "src": "/galeria/masters/117-4241c0ef73.webp",
+    "thumbSrc": "/galeria/thumbs/117-4241c0ef73.webp",
+    "width": 2400,
+    "height": 1600,
+    "alt": "117",
+    "filename": "117.JPG"
+  },
+  {
+    "id": "6658611ae2",
+    "src": "/galeria/masters/119-6658611ae2.webp",
+    "thumbSrc": "/galeria/thumbs/119-6658611ae2.webp",
+    "width": 1600,
+    "height": 2400,
+    "alt": "119",
+    "filename": "119.JPG"
+  },
+  {
+    "id": "a2e594b729",
+    "src": "/galeria/masters/124-a2e594b729.webp",
+    "thumbSrc": "/galeria/thumbs/124-a2e594b729.webp",
+    "width": 2400,
+    "height": 1600,
+    "alt": "124",
+    "filename": "124.JPG"
+  },
+  {
+    "id": "f20ce9da85",
+    "src": "/galeria/masters/128-f20ce9da85.webp",
+    "thumbSrc": "/galeria/thumbs/128-f20ce9da85.webp",
+    "width": 2400,
+    "height": 1600,
+    "alt": "128",
+    "filename": "128.JPG"
+  },
+  {
+    "id": "52536a5e86",
+    "src": "/galeria/masters/149-52536a5e86.webp",
+    "thumbSrc": "/galeria/thumbs/149-52536a5e86.webp",
+    "width": 2400,
+    "height": 1600,
+    "alt": "149",
+    "filename": "149.JPG"
+  },
+  {
+    "id": "bfb4bc4cf4",
+    "src": "/galeria/masters/151-bfb4bc4cf4.webp",
+    "thumbSrc": "/galeria/thumbs/151-bfb4bc4cf4.webp",
+    "width": 2400,
+    "height": 1600,
+    "alt": "151",
+    "filename": "151.JPG"
+  },
+  {
+    "id": "2d62bc3334",
+    "src": "/galeria/masters/152-2d62bc3334.webp",
+    "thumbSrc": "/galeria/thumbs/152-2d62bc3334.webp",
+    "width": 2400,
+    "height": 1600,
+    "alt": "152",
+    "filename": "152.JPG"
+  },
+  {
+    "id": "d1574a576d",
+    "src": "/galeria/masters/187-d1574a576d.webp",
+    "thumbSrc": "/galeria/thumbs/187-d1574a576d.webp",
+    "width": 2400,
+    "height": 2398,
+    "alt": "187",
+    "filename": "187.JPG"
+  },
+  {
+    "id": "3091affb4c",
+    "src": "/galeria/masters/194-3091affb4c.webp",
+    "thumbSrc": "/galeria/thumbs/194-3091affb4c.webp",
+    "width": 2400,
+    "height": 1600,
+    "alt": "194",
+    "filename": "194.JPG"
+  },
+  {
+    "id": "c4669ca5fc",
+    "src": "/galeria/masters/195-c4669ca5fc.webp",
+    "thumbSrc": "/galeria/thumbs/195-c4669ca5fc.webp",
+    "width": 2400,
+    "height": 1600,
+    "alt": "195",
+    "filename": "195.JPG"
+  },
+  {
+    "id": "d7e129dbbc",
+    "src": "/galeria/masters/254-d7e129dbbc.webp",
+    "thumbSrc": "/galeria/thumbs/254-d7e129dbbc.webp",
+    "width": 2400,
+    "height": 1600,
+    "alt": "254",
+    "filename": "254.JPG"
+  },
+  {
+    "id": "713732c75a",
+    "src": "/galeria/masters/272-713732c75a.webp",
+    "thumbSrc": "/galeria/thumbs/272-713732c75a.webp",
+    "width": 2400,
+    "height": 1600,
+    "alt": "272",
+    "filename": "272.JPG"
+  },
+  {
+    "id": "7efaeecabb",
+    "src": "/galeria/masters/277-7efaeecabb.webp",
+    "thumbSrc": "/galeria/thumbs/277-7efaeecabb.webp",
+    "width": 2400,
+    "height": 1600,
+    "alt": "277",
+    "filename": "277.JPG"
+  },
+  {
+    "id": "6d30701df7",
+    "src": "/galeria/masters/288-6d30701df7.webp",
+    "thumbSrc": "/galeria/thumbs/288-6d30701df7.webp",
+    "width": 2400,
+    "height": 1600,
+    "alt": "288",
+    "filename": "288.JPG"
+  },
+  {
+    "id": "71ba3c923c",
+    "src": "/galeria/masters/298-71ba3c923c.webp",
+    "thumbSrc": "/galeria/thumbs/298-71ba3c923c.webp",
+    "width": 2400,
+    "height": 1600,
+    "alt": "298",
+    "filename": "298.JPG"
+  },
+  {
+    "id": "0b86c0c9b9",
+    "src": "/galeria/masters/305-0b86c0c9b9.webp",
+    "thumbSrc": "/galeria/thumbs/305-0b86c0c9b9.webp",
+    "width": 2400,
+    "height": 1600,
+    "alt": "305",
+    "filename": "305.JPG"
+  },
+  {
+    "id": "9920b332b3",
+    "src": "/galeria/masters/309-9920b332b3.webp",
+    "thumbSrc": "/galeria/thumbs/309-9920b332b3.webp",
+    "width": 2400,
+    "height": 1600,
+    "alt": "309",
+    "filename": "309.JPG"
+  },
+  {
+    "id": "1a9c2c1137",
+    "src": "/galeria/masters/314-1a9c2c1137.webp",
+    "thumbSrc": "/galeria/thumbs/314-1a9c2c1137.webp",
+    "width": 2400,
+    "height": 1600,
+    "alt": "314",
+    "filename": "314.JPG"
+  },
+  {
+    "id": "625a230004",
+    "src": "/galeria/masters/329-625a230004.webp",
+    "thumbSrc": "/galeria/thumbs/329-625a230004.webp",
+    "width": 2400,
+    "height": 1600,
+    "alt": "329",
+    "filename": "329.JPG"
+  },
+  {
+    "id": "4f8cceae56",
+    "src": "/galeria/masters/341-4f8cceae56.webp",
+    "thumbSrc": "/galeria/thumbs/341-4f8cceae56.webp",
+    "width": 2400,
+    "height": 1600,
+    "alt": "341",
+    "filename": "341.JPG"
+  }
+];

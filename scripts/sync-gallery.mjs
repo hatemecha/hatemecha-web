@@ -1,14 +1,17 @@
 import { createHash } from "node:crypto";
-import { mkdir, readdir, writeFile } from "node:fs/promises";
+import { mkdir, readdir, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 
 const rootDirectory = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
-const originalsDirectory = path.join(rootDirectory, "public", "galeria", "originales");
+const sourceDirectory = path.join(rootDirectory, "!PORTFOLIO");
+const mastersDirectory = path.join(rootDirectory, "public", "galeria", "masters");
 const thumbsDirectory = path.join(rootDirectory, "public", "galeria", "thumbs");
 const manifestPath = path.join(rootDirectory, "src", "data", "galleryManifest.ts");
 const supportedExtensions = new Set([".avif", ".jpeg", ".jpg", ".png", ".tif", ".tiff", ".webp"]);
+const MASTER_MAX_EDGE = 2400;
+const THUMB_WIDTH = 420;
 
 function getPublicUrl(...segments) {
   return `/${segments.map((segment) => encodeURIComponent(segment)).join("/")}`;
@@ -67,11 +70,21 @@ export const galleryItems: GalleryItem[] = ${JSON.stringify(items, null, 2)};
 `;
 }
 
-async function getOriginalFiles() {
-  await mkdir(originalsDirectory, { recursive: true });
+async function isNewerThan(sourcePath, outputPath) {
+  try {
+    const [sourceStats, outputStats] = await Promise.all([stat(sourcePath), stat(outputPath)]);
+    return sourceStats.mtimeMs > outputStats.mtimeMs;
+  } catch {
+    return true;
+  }
+}
+
+async function getSourceFiles() {
+  await mkdir(sourceDirectory, { recursive: true });
+  await mkdir(mastersDirectory, { recursive: true });
   await mkdir(thumbsDirectory, { recursive: true });
 
-  const entries = await readdir(originalsDirectory, { withFileTypes: true });
+  const entries = await readdir(sourceDirectory, { withFileTypes: true });
 
   return entries
     .filter((entry) => entry.isFile() && supportedExtensions.has(path.extname(entry.name).toLowerCase()))
@@ -80,33 +93,57 @@ async function getOriginalFiles() {
 }
 
 async function syncGallery() {
-  const files = await getOriginalFiles();
+  const files = await getSourceFiles();
   const items = [];
 
   for (const filename of files) {
     const id = getStableId(filename);
-    const thumbFilename = `${slugifyFilename(filename)}-${id}.webp`;
-    const originalPath = path.join(originalsDirectory, filename);
+    const baseName = `${slugifyFilename(filename)}-${id}`;
+    const masterFilename = `${baseName}.webp`;
+    const thumbFilename = `${baseName}.webp`;
+    const sourcePath = path.join(sourceDirectory, filename);
+    const masterPath = path.join(mastersDirectory, masterFilename);
     const thumbPath = path.join(thumbsDirectory, thumbFilename);
-    const image = sharp(originalPath);
-    const metadata = await image.metadata();
-    const { width, height } = getDisplayDimensions(metadata);
 
-    await sharp(originalPath)
-      .rotate()
-      .resize({
-        width: 420,
-        withoutEnlargement: true
-      })
-      .webp({
-        effort: 5,
-        quality: 78
-      })
-      .toFile(thumbPath);
+    const needsMaster = await isNewerThan(sourcePath, masterPath);
+    const needsThumb = await isNewerThan(sourcePath, thumbPath);
+
+    if (needsMaster) {
+      await sharp(sourcePath)
+        .rotate()
+        .resize({
+          width: MASTER_MAX_EDGE,
+          height: MASTER_MAX_EDGE,
+          fit: "inside",
+          withoutEnlargement: true
+        })
+        .webp({
+          effort: 5,
+          quality: 82
+        })
+        .toFile(masterPath);
+    }
+
+    if (needsThumb) {
+      await sharp(sourcePath)
+        .rotate()
+        .resize({
+          width: THUMB_WIDTH,
+          withoutEnlargement: true
+        })
+        .webp({
+          effort: 5,
+          quality: 78
+        })
+        .toFile(thumbPath);
+    }
+
+    const masterMetadata = await sharp(masterPath).metadata();
+    const { width, height } = getDisplayDimensions(masterMetadata);
 
     items.push({
       id,
-      src: getPublicUrl("galeria", "originales", filename),
+      src: getPublicUrl("galeria", "masters", masterFilename),
       thumbSrc: getPublicUrl("galeria", "thumbs", thumbFilename),
       width,
       height,
@@ -116,7 +153,7 @@ async function syncGallery() {
   }
 
   await writeFile(manifestPath, buildManifest(items));
-  console.log(`gallery: synced ${items.length} image${items.length === 1 ? "" : "s"}`);
+  console.log(`gallery: synced ${items.length} image${items.length === 1 ? "" : "s"} from !PORTFOLIO`);
 }
 
 syncGallery().catch((error) => {

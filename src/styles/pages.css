@@ -1,16 +1,103 @@
-.galleryPage {
+.galleryRevealPage {
   position: fixed;
   inset: 0;
   z-index: 1;
   min-height: 100svh;
   overflow: auto;
-  padding: clamp(86px, 12vh, 132px) clamp(10px, 2.2vw, 30px) clamp(38px, 7vh, 72px);
-  background:
-    linear-gradient(180deg, oklch(0% 0 0 / 0.18), oklch(0% 0 0 / 0.66)),
-    url("/assets/hatemecha-bg-blur-noise.webp") center / cover fixed no-repeat;
+  padding: 0;
+  background: #000;
   color: var(--fg);
-  scrollbar-color: var(--accent) var(--ink);
+  scrollbar-color: var(--accent) #000;
   scrollbar-width: thin;
+}
+
+.galleryMenuButton {
+  position: fixed;
+  top: max(env(safe-area-inset-top, 0px), 14px);
+  right: max(env(safe-area-inset-right, 0px), 14px);
+  z-index: 8;
+  min-width: 72px;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid rgb(var(--accent-rgb) / 0.55);
+  background: oklch(0% 0 0 / 0.72);
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: lowercase;
+  transition:
+    color 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    background 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.galleryMenuButton:hover,
+.galleryMenuButton:focus-visible {
+  color: var(--ink);
+  background: var(--accent);
+  border-color: var(--accent);
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.galleryLockupAnchor {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: 5;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.galleryLockup {
+  display: grid;
+  justify-items: center;
+  gap: clamp(8px, 1.4vh, 14px);
+  padding: clamp(16px, 3vw, 28px);
+  pointer-events: none;
+}
+
+.galleryLockup:not([data-faded="true"]) {
+  pointer-events: auto;
+}
+
+.galleryLockup[data-faded="true"] {
+  pointer-events: none;
+}
+
+.galleryLockupTitle {
+  margin: 0;
+  color: var(--fg);
+  font-family: var(--font-display);
+  font-size: clamp(56px, 12vw, 140px);
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  line-height: 0.82;
+  text-align: center;
+  text-wrap: balance;
+  text-shadow: 0 8px 40px oklch(0% 0 0 / 0.85);
+}
+
+.galleryLockupJp {
+  margin: 0;
+  color: var(--accent);
+  font-family: var(--font-jp);
+  font-size: clamp(14px, 2vw, 22px);
+  font-weight: 900;
+  letter-spacing: 0.22em;
+  line-height: 1;
+  text-align: center;
+  text-shadow: 0 4px 24px oklch(0% 0 0 / 0.8);
+}
+
+.galleryRevealContent {
+  position: relative;
+  z-index: 1;
+  min-height: 100svh;
+  padding: 0;
 }
 
 .smoothPageContent {
@@ -31,19 +118,6 @@
   color: var(--fg);
   scrollbar-color: var(--accent) var(--ink);
   scrollbar-width: thin;
-}
-
-.galleryPage::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  background:
-    linear-gradient(90deg, rgb(var(--accent-rgb) / 0.38) 0 1px, transparent 1px 100%),
-    linear-gradient(180deg, oklch(100% 0 0 / 0.05) 0 1px, transparent 1px 100%);
-  background-size: clamp(74px, 7vw, 132px) clamp(74px, 7vw, 132px);
-  opacity: 0.18;
-  pointer-events: none;
 }
 
 .projectsPage::before {
@@ -294,85 +368,68 @@
   transform: translateY(-1px);
 }
 
-.galleryGrid {
+.galleryRevealGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(clamp(72px, 8vw, 148px), 1fr));
-  grid-auto-flow: dense;
-  gap: clamp(18px, 3vw, 54px) clamp(14px, 2.5vw, 48px);
-  align-items: start;
+  grid-template-columns: repeat(auto-fit, minmax(min(18vw, 160px), 1fr));
+  grid-auto-rows: minmax(14svh, 1fr);
+  gap: 3px;
+  width: 100%;
+  min-height: 100svh;
+  align-content: stretch;
 }
 
-.galleryTile {
+.galleryRevealTile {
   position: relative;
   display: block;
   min-width: 0;
+  min-height: 0;
   overflow: hidden;
   border: 0;
-  background: oklch(0% 0 0 / 0.52);
+  background: #000;
   padding: 0;
-  box-shadow: 0 18px 34px oklch(0% 0 0 / 0.26);
+  cursor: crosshair;
   transform: translateZ(0);
-  transition:
-    box-shadow 190ms ease,
-    filter 190ms ease,
-    transform 190ms ease;
 }
 
-.galleryTile[data-span="wide"] {
-  grid-column: span 2;
-}
-
-.galleryTile[data-span="tall"] {
-  grid-row: span 2;
-}
-
-.galleryTile[data-span="large"] {
-  grid-column: span 2;
-}
-
-.galleryTile:hover,
-.galleryTile:focus-visible {
-  filter: grayscale(0);
-  outline: 1px solid var(--accent);
-  outline-offset: 5px;
-  transform: translateY(-2px);
-  box-shadow: 0 24px 48px oklch(0% 0 0 / 0.36);
-}
-
-.galleryThumb {
+.galleryRevealThumb {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: grayscale(1) contrast(1.07) brightness(1.02);
-  transition:
-    filter 190ms ease,
-    scale 260ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.galleryTile:hover .galleryThumb,
-.galleryTile:focus-visible .galleryThumb {
-  filter: grayscale(0) contrast(1.04) brightness(1.02);
-  scale: 1.025;
-}
-
-.galleryTileIndex {
-  position: absolute;
-  right: 4px;
-  bottom: 4px;
-  padding: 0.28em 0.38em;
-  background: oklch(0% 0 0 / 0.78);
-  color: var(--accent);
-  font-family: var(--font-mono);
-  font-size: clamp(8px, 0.8vw, 10px);
-  font-weight: 900;
-  line-height: 1;
   opacity: 0;
-  transition: opacity 160ms ease;
+  transform: scale(1.04);
+  filter: brightness(0);
+  transition:
+    opacity 480ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 560ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform, filter;
 }
 
-.galleryTile:hover .galleryTileIndex,
-.galleryTile:focus-visible .galleryTileIndex {
+.galleryRevealTile[data-hot="true"] .galleryRevealThumb,
+.galleryRevealTile:focus-visible .galleryRevealThumb {
   opacity: 1;
+  filter: brightness(1);
+  transform: scale(1);
+}
+
+.galleryRevealTile:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: -1px;
+  z-index: 2;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .galleryRevealThumb {
+    opacity: 0.18;
+    filter: brightness(0.28);
+    transform: scale(1);
+  }
+
+  .galleryRevealTile[data-hot="true"] .galleryRevealThumb,
+  .galleryRevealTile:focus-visible .galleryRevealThumb {
+    opacity: 1;
+    filter: brightness(1);
+  }
 }
 
 .galleryEmpty {
@@ -381,7 +438,7 @@
   min-height: 42svh;
   place-content: center;
   gap: 14px;
-  margin: 0 auto;
+  margin: 12vh auto 0;
   border: 1px solid rgb(var(--accent-rgb) / 0.52);
   background: oklch(0% 0 0 / 0.54);
   color: var(--fg);
@@ -413,9 +470,7 @@
 .galleryLightboxScrim {
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(180deg, oklch(0% 0 0 / 0.68), oklch(0% 0 0 / 0.92)),
-    url("/assets/hatemecha-bg-blur-noise.webp") center / cover no-repeat;
+  background: oklch(0% 0 0 / 0.92);
 }
 
 .galleryLightboxFrame {
@@ -436,7 +491,7 @@
   height: auto;
   object-fit: contain;
   border: 1px solid oklch(100% 0 0 / 0.16);
-  background: oklch(0% 0 0 / 0.62);
+  background: #000;
   box-shadow: 0 26px 80px oklch(0% 0 0 / 0.64);
 }
 

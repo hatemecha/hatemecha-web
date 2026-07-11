@@ -17,3 +17,6 @@ pnpm-debug.log*
 Thumbs.db
 
 .omx
+
+# Raw portfolio JPEGs — sync generates public/galeria/masters + thumbs
+\!PORTFOLIO/

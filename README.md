@@ -23,8 +23,9 @@ npm run gallery:sync
 
 ## Galería
 
-1. Pon fotos en `public/galeria/originales/`
-2. Corré `npm run gallery:sync` (también corre en `dev` / `build`)
+1. Pon fotos en `!PORTFOLIO/` (gitignored; JPEG/WebP/etc.)
+2. Corré `npm run gallery:sync` — genera masters + thumbs WebP en `public/galeria/`
+3. También corre automáticamente en `dev` / `build`
 
 ## Marca
 
