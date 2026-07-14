@@ -257,18 +257,18 @@
     grid-template-areas:
       "media"
       "body";
-    gap: 16px;
+    gap: 14px;
     padding: 20px 0;
   }
 
   .projectMedia::after {
-    width: 36px;
+    width: 32px;
   }
 
   .projectRow[data-media-side="end"] .projectMedia::after {
     left: auto;
     right: 0;
-    background: linear-gradient(90deg, transparent, oklch(0% 0 0 / 0.72));
+    background: linear-gradient(90deg, transparent, #000);
   }
 
   .projectShot {
@@ -276,7 +276,7 @@
   }
 
   .projectBody {
-    padding-block: 0;
+    padding: 16px 14px;
   }
 
   .projectTitle {
@@ -294,6 +294,7 @@
 
   .projectActions a {
     flex: 1;
+    min-width: 0;
   }
 
   .galleryRevealGrid {
