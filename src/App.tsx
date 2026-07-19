@@ -1,8 +1,10 @@
 import { useCallback, useState, type ReactNode } from "react";
 import { AnimatePresence, motion } from "motion/react";
+import { CvSkillsPage } from "./components/CvSkillsPage";
 import { GalleryPage } from "./components/GalleryPage";
 import { Hero } from "./components/Hero";
 import { MenuOverlay } from "./components/MenuOverlay";
+import { MusicPage } from "./components/MusicPage";
 import { ProjectsPage } from "./components/ProjectsPage";
 import { SectionPage } from "./components/SectionPage";
 import { normalizePortfolioSectionIndex, portfolioSections } from "./data/portfolioSections";
@@ -90,8 +92,7 @@ function renderActiveView(activeView: AppView, handlers: ViewHandlers): ReactNod
     case "cv-skills":
       return (
         <motion.div className="appView" key="cv-skills" {...viewMotion}>
-          <SectionPage
-            sectionId="cv-skills"
+          <CvSkillsPage
             onBackToMenu={() => handlers.returnToSectionMenu(getSectionIndexForView("cv-skills"))}
           />
         </motion.div>
@@ -99,8 +100,7 @@ function renderActiveView(activeView: AppView, handlers: ViewHandlers): ReactNod
     case "musica":
       return (
         <motion.div className="appView" key="musica" {...viewMotion}>
-          <SectionPage
-            sectionId="musica"
+          <MusicPage
             onBackToMenu={() => handlers.returnToSectionMenu(getSectionIndexForView("musica"))}
           />
         </motion.div>

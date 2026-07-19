@@ -36,7 +36,11 @@ export function PortfolioPageShell({
   const headerClassName = [
     "galleryHeader",
     "portfolioPageHeader",
-    className.includes("projectsPage") ? "projectsHeader" : null
+    className.includes("projectsPage") ||
+    className.includes("musicPage") ||
+    className.includes("cvSkillsPage")
+      ? "projectsHeader"
+      : null
   ]
     .filter(Boolean)
     .join(" ");

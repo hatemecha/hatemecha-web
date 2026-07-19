@@ -5,13 +5,11 @@ import { PortfolioPageShell } from "./PortfolioPageShell";
 import { ScrambleText } from "./ScrambleText";
 
 type SectionPageProps = {
-  sectionId: Exclude<PortfolioSectionId, "home" | "galeria" | "proyectos">;
+  sectionId: Extract<PortfolioSectionId, "acerca">;
   onBackToMenu: () => void;
 };
 
 const sectionPageClassName = {
-  "cv-skills": "sectionPage sectionPageCv",
-  musica: "sectionPage sectionPageMusica",
   acerca: "sectionPage sectionPageAcerca"
 } as const;
 
