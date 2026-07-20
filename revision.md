@@ -522,5 +522,17 @@ Reportá al final: archivos tocados, qué quedó pending, y cómo probar.
 - [x] Grain bajo el UI
 - [x] Project strip pausa offscreen
 - [x] CI dist size budget
-- Masters lightbox mid-size (P2-9) — pendiente si hace falta ahorrar más bandwidth
-- Swipe menú mobile (P3)
+- [x] Masters/lightbox mid-size → `galeria/view/` ~1600px (~5 MB vs ~15 MB)
+- [x] Swipe menú mobile
+- [x] referrerpolicy en links externos
+- [x] ojos.webp
+- [x] site.webmanifest
+- [x] brand-spec `--muted` alineado a tokens
+
+### Residuales de perfeccionismo (si algún día)
+- Playwright smoke e2e en CI (hoy solo budget de `dist`)
+- CSP headers (si el host lo permite; GH Pages es limitado)
+- Derivada aún más chica solo-lightbox vs view actual
+- Limpieza manual de `public/galeria/masters/` si Windows dejó 1 archivo locked
+- Animación enter del menú más fina / menos scramble en SR (ya mitigado)
+- `404.html` brand page (no hace falta con hash routing)

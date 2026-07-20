@@ -1,0 +1,22 @@
+{
+  "name": "Hatemecha",
+  "short_name": "Hatemecha",
+  "description": "Portfolio visual de Hatemecha: diseño, fotografía y proyectos desde Bahía Blanca.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#080808",
+  "theme_color": "#080808",
+  "lang": "es-AR",
+  "icons": [
+    {
+      "src": "assets/favicon-32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

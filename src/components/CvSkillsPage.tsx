@@ -37,7 +37,13 @@ export function CvSkillsPage({ onBackToMenu }: CvSkillsPageProps) {
 
         <motion.nav className="cvLinks" aria-label="Enlaces" variants={pageItemVariants}>
           {cvLinks.map((link) => (
-            <a key={link.id} href={link.href} target="_blank" rel="noopener noreferrer">
+            <a
+              key={link.id}
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              referrerPolicy="strict-origin-when-cross-origin"
+            >
               {link.label}
             </a>
           ))}

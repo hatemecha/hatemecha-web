@@ -1,16 +1,18 @@
 import { createHash } from "node:crypto";
-import { mkdir, readdir, stat, unlink, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, readdir, rename, stat, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 
 const rootDirectory = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const sourceDirectory = path.join(rootDirectory, "!PORTFOLIO");
-const mastersDirectory = path.join(rootDirectory, "public", "galeria", "masters");
+const viewDirectory = path.join(rootDirectory, "public", "galeria", "view");
 const thumbsDirectory = path.join(rootDirectory, "public", "galeria", "thumbs");
+const legacyMastersDirectory = path.join(rootDirectory, "public", "galeria", "masters");
 const manifestPath = path.join(rootDirectory, "src", "data", "galleryManifest.ts");
 const supportedExtensions = new Set([".avif", ".jpeg", ".jpg", ".png", ".tif", ".tiff", ".webp"]);
-const MASTER_MAX_EDGE = 2400;
+/** Lightbox/display max edge — kept modest for GH Pages weight (~was 2400 masters). */
+const VIEW_MAX_EDGE = 1600;
 const THUMB_WIDTH = 420;
 
 function getPublicUrl(...segments) {
@@ -80,9 +82,52 @@ async function isNewerThan(sourcePath, outputPath) {
   }
 }
 
+async function exceedsMaxEdge(outputPath, maxEdge) {
+  try {
+    const metadata = await sharp(outputPath).metadata();
+    const edge = Math.max(metadata.width ?? 0, metadata.height ?? 0);
+    return edge > maxEdge;
+  } catch {
+    return true;
+  }
+}
+
+async function writeWebpAtomic(tempPath, finalPath, pipeline) {
+  await pipeline.toFile(tempPath);
+  try {
+    await rename(tempPath, finalPath);
+  } catch {
+    await copyFile(tempPath, finalPath);
+    await unlink(tempPath).catch(() => undefined);
+  }
+}
+
+async function pruneDirectory(directory, keepNames) {
+  let pruned = 0;
+  let entries = [];
+  try {
+    entries = await readdir(directory);
+  } catch {
+    return 0;
+  }
+
+  for (const filename of entries) {
+    if (!filename.endsWith(".webp") || filename.endsWith(".tmp.webp")) continue;
+    if (keepNames?.has(filename)) continue;
+    try {
+      await unlink(path.join(directory, filename));
+      pruned += 1;
+    } catch {
+      // File may be locked by the Windows/Vite file watcher.
+    }
+  }
+
+  return pruned;
+}
+
 async function getSourceFiles() {
   await mkdir(sourceDirectory, { recursive: true });
-  await mkdir(mastersDirectory, { recursive: true });
+  await mkdir(viewDirectory, { recursive: true });
   await mkdir(thumbsDirectory, { recursive: true });
 
   const entries = await readdir(sourceDirectory, { withFileTypes: true });
@@ -108,51 +153,58 @@ async function syncGallery() {
   for (const filename of files) {
     const id = getStableId(filename);
     const baseName = `${slugifyFilename(filename)}-${id}`;
-    const masterFilename = `${baseName}.webp`;
+    const viewFilename = `${baseName}.webp`;
     const thumbFilename = `${baseName}.webp`;
     const sourcePath = path.join(sourceDirectory, filename);
-    const masterPath = path.join(mastersDirectory, masterFilename);
+    const viewPath = path.join(viewDirectory, viewFilename);
     const thumbPath = path.join(thumbsDirectory, thumbFilename);
 
-    const needsMaster = await isNewerThan(sourcePath, masterPath);
+    const needsView =
+      (await isNewerThan(sourcePath, viewPath)) || (await exceedsMaxEdge(viewPath, VIEW_MAX_EDGE));
     const needsThumb = await isNewerThan(sourcePath, thumbPath);
 
-    if (needsMaster) {
-      await sharp(sourcePath)
-        .rotate()
-        .resize({
-          width: MASTER_MAX_EDGE,
-          height: MASTER_MAX_EDGE,
-          fit: "inside",
-          withoutEnlargement: true
-        })
-        .webp({
-          effort: 5,
-          quality: 82
-        })
-        .toFile(masterPath);
+    if (needsView) {
+      await writeWebpAtomic(
+        `${viewPath}.tmp.webp`,
+        viewPath,
+        sharp(sourcePath)
+          .rotate()
+          .resize({
+            width: VIEW_MAX_EDGE,
+            height: VIEW_MAX_EDGE,
+            fit: "inside",
+            withoutEnlargement: true
+          })
+          .webp({
+            effort: 5,
+            quality: 78
+          })
+      );
     }
 
     if (needsThumb) {
-      await sharp(sourcePath)
-        .rotate()
-        .resize({
-          width: THUMB_WIDTH,
-          withoutEnlargement: true
-        })
-        .webp({
-          effort: 5,
-          quality: 78
-        })
-        .toFile(thumbPath);
+      await writeWebpAtomic(
+        `${thumbPath}.tmp.webp`,
+        thumbPath,
+        sharp(sourcePath)
+          .rotate()
+          .resize({
+            width: THUMB_WIDTH,
+            withoutEnlargement: true
+          })
+          .webp({
+            effort: 5,
+            quality: 78
+          })
+      );
     }
 
-    const masterMetadata = await sharp(masterPath).metadata();
-    const { width, height } = getDisplayDimensions(masterMetadata);
+    const viewMetadata = await sharp(viewPath).metadata();
+    const { width, height } = getDisplayDimensions(viewMetadata);
 
     items.push({
       id,
-      src: getPublicUrl("galeria", "masters", masterFilename),
+      src: getPublicUrl("galeria", "view", viewFilename),
       thumbSrc: getPublicUrl("galeria", "thumbs", thumbFilename),
       width,
       height,
@@ -163,21 +215,12 @@ async function syncGallery() {
 
   await writeFile(manifestPath, buildManifest(items));
 
-  const keepMasters = new Set(items.map((item) => path.basename(item.src)));
+  const keepViews = new Set(items.map((item) => path.basename(item.src)));
   const keepThumbs = new Set(items.map((item) => path.basename(item.thumbSrc)));
-  let pruned = 0;
-
-  for (const filename of await readdir(mastersDirectory)) {
-    if (!filename.endsWith(".webp") || keepMasters.has(filename)) continue;
-    await unlink(path.join(mastersDirectory, filename));
-    pruned += 1;
-  }
-
-  for (const filename of await readdir(thumbsDirectory)) {
-    if (!filename.endsWith(".webp") || keepThumbs.has(filename)) continue;
-    await unlink(path.join(thumbsDirectory, filename));
-    pruned += 1;
-  }
+  let pruned = await pruneDirectory(viewDirectory, keepViews);
+  pruned += await pruneDirectory(thumbsDirectory, keepThumbs);
+  // Legacy 2400px masters folder — drop when unlocked.
+  pruned += await pruneDirectory(legacyMastersDirectory, null);
 
   console.log(
     `gallery: synced ${items.length} image${items.length === 1 ? "" : "s"} from !PORTFOLIO` +

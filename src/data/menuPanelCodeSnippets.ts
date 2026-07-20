@@ -5,73 +5,56 @@ export type MenuPanelCodePair = {
   bottom: string;
 };
 
-/** Short repo excerpts — decorative only (see MenuOverlay aria-hidden). */
+/** Short repo excerpts — keep ≤4 short lines for `.menuCodeSnippet` (4× line-height). */
 export const menuPanelCodeBySection: Record<PortfolioSectionId, MenuPanelCodePair> = {
   home: {
-    top: `function carouselScale(distance: number) {
-  const scale = 1 - Math.abs(distance) * 0.042;
+    top: `function carouselScale(d: number) {
+  const scale = 1 - Math.abs(d) * 0.042;
   return Math.max(0.82, scale);
 }`,
-    bottom: `function clamp(value: number, min: number, max: number) {
-  return Math.min(Math.max(value, min), max);
+    bottom: `function clamp(v: number, min: number, max: number) {
+  return Math.min(Math.max(v, min), max);
 }`
   },
   proyectos: {
-    top: `function normalizePortfolioSectionIndex(index: number) {
-  const count = portfolioSections.length;
-  return ((index % count) + count) % count;
+    top: `function normalizeIndex(index: number) {
+  const n = portfolioSections.length;
+  return ((index % n) + n) % n;
 }`,
-    bottom: `function carouselOpacity(distance: number) {
-  const opacityIndex = Math.min(
-    Math.abs(distance),
-    CAROUSEL_OPACITY_BY_DISTANCE.length - 1
-  );
-  return CAROUSEL_OPACITY_BY_DISTANCE[opacityIndex];
+    bottom: `function carouselOpacity(d: number) {
+  const i = Math.min(Math.abs(d), 4);
+  return OPACITY[i];
 }`
   },
   "cv-skills": {
-    top: `function clearCodeSnippet(element: HTMLElement) {
-  element.replaceChildren();
+    top: `function clearCodeSnippet(el: HTMLElement) {
+  el.replaceChildren();
 }`,
-    bottom: `function clearTimeouts(timeoutIds: TimeoutId[]) {
-  timeoutIds.forEach((timeoutId) =>
-    window.clearTimeout(timeoutId)
-  );
+    bottom: `function clearTimeouts(ids: TimeoutId[]) {
+  ids.forEach((id) => clearTimeout(id));
 }`
   },
   galeria: {
     top: `function createCodeLine(line: string) {
-  const lineElement = document.createElement("span");
-  lineElement.className = "menuCodeLine";
-  lineElement.textContent = line.length > 0 ? line : " ";
-  return lineElement;
+  const el = document.createElement("span");
+  Object.assign(el, { className: "menuCodeLine", textContent: line || " " });
 }`,
     bottom: `function getConnectionY(rect: Rect) {
   return Math.round(rect.y + rect.h / 2);
 }`
   },
   musica: {
-    top: `function getFrameRect(frame: HTMLElement, containerRect: DOMRect) {
-  const frameRect = frame.getBoundingClientRect();
-  return {
-    x: frameRect.left - containerRect.left,
-    y: frameRect.top - containerRect.top,
-    w: frameRect.width,
-    h: frameRect.height
-  };
+    top: `function getFrameRect(frame: HTMLElement, box: DOMRect) {
+  const r = frame.getBoundingClientRect();
+  return { x: r.left - box.left, y: r.top - box.top };
 }`,
-    bottom: `function getPhotoAspectRatio(width: number, height: number) {
-  if (width <= 0 || height <= 0) {
-    throw new Error("Photo dimensions must be positive.");
-  }
-  return \`\${width} / \${height}\`;
+    bottom: `function getPhotoAspectRatio(w: number, h: number) {
+  return \`\${w} / \${h}\`;
 }`
   },
   acerca: {
-    top: `function renderCodeLines(element: HTMLElement, code: string) {
-  return code.split("\\n").map((line) =>
-    element.append(createCodeLine(line))
-  );
+    top: `function renderCodeLines(el: HTMLElement, code: string) {
+  code.split("\\n").forEach((line) => el.append(createCodeLine(line)));
 }`,
     bottom: `function getConnectionY(rect: Rect) {
   return Math.round(rect.y + rect.h / 2);

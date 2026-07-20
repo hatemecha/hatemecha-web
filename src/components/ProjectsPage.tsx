@@ -163,10 +163,20 @@ export function ProjectsPage({ onBackToMenu }: ProjectsPageProps) {
                   delay={180 + index * 120}
                 />
                 <div className="projectActions">
-                  <a href={project.siteUrl} target="_blank" rel="noopener noreferrer">
+                  <a
+                    href={project.siteUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                  >
                     web
                   </a>
-                  <a href={project.repoUrl} target="_blank" rel="noopener noreferrer">
+                  <a
+                    href={project.repoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                  >
                     repo
                   </a>
                 </div>

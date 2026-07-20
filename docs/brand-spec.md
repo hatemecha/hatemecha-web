@@ -7,7 +7,7 @@
   --bg:       oklch(8% 0.006 260);
   --surface:  oklch(12% 0.006 260);
   --fg:       oklch(96% 0.006 95);
-  --muted:    oklch(70% 0.008 95);
+  --muted:    oklch(76% 0.008 95);
   --border:   oklch(84% 0.008 95);
   --accent:   oklch(61% 0.28 29);
   --accent-rgb: 255 0 0;

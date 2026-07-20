@@ -222,20 +222,19 @@
   width: 100%;
   max-width: 100%;
   margin: 0;
-  padding: clamp(6px, 1vw, 12px) 0;
+  padding: 0;
   border: none;
   background: transparent;
   color: oklch(78% 0.03 15 / 0.62);
   font-family: var(--font-mono);
   font-size: clamp(8.5px, 0.8vw, 12px);
   font-weight: 600;
-  line-height: 1.34;
+  line-height: 1.35;
   letter-spacing: 0;
-  white-space: pre-wrap;
+  white-space: pre;
   overflow: hidden;
-  overflow-wrap: anywhere;
-  height: clamp(4.25rem, 9vh, 6.25rem);
-  contain: paint;
+  /* Exact line boxes — avoids clipping glyphs mid-line. */
+  height: calc(4 * 1.35em);
   pointer-events: none;
   user-select: none;
 }

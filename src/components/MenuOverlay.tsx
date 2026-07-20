@@ -1,4 +1,4 @@
-import type { CSSProperties, RefObject } from "react";
+import type { CSSProperties, PointerEvent as ReactPointerEvent, RefObject } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMenuPanelCodeTyping } from "../hooks/useMenuPanelCodeTyping";
 import { normalizePortfolioSectionIndex, type PortfolioSection } from "../data/portfolioSections";
@@ -50,13 +50,14 @@ export function MenuOverlay({
   const codeTopRef = useRef<HTMLPreElement>(null);
   const codeBottomRef = useRef<HTMLPreElement>(null);
   const enterButtonRef = useRef<HTMLButtonElement>(null);
+  const swipeStartRef = useRef<{ x: number; y: number } | null>(null);
   const activeSection = sections[activeIndex];
   const [controlsHint, setControlsHint] = useState("↑↓ ←→ · WASD · enter · rueda");
 
   useEffect(() => {
     const media = window.matchMedia(COARSE_POINTER_QUERY);
     const syncHint = () => {
-      setControlsHint(media.matches ? "tocá la lista · enter" : "↑↓ ←→ · WASD · enter · rueda");
+      setControlsHint(media.matches ? "deslizá · lista · enter" : "↑↓ ←→ · WASD · enter · rueda");
     };
     syncHint();
     media.addEventListener("change", syncHint);
@@ -80,6 +81,31 @@ export function MenuOverlay({
   }, [activeIndex, sections]);
 
   useMenuPanelCodeTyping(isOpen, activeSection.id, codeTopRef, codeBottomRef);
+
+  const handleStagePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (event.pointerType === "mouse") return;
+    swipeStartRef.current = { x: event.clientX, y: event.clientY };
+  };
+
+  const handleStagePointerUp = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const start = swipeStartRef.current;
+    swipeStartRef.current = null;
+    if (!start || event.pointerType === "mouse") return;
+
+    const deltaX = event.clientX - start.x;
+    const deltaY = event.clientY - start.y;
+    const absX = Math.abs(deltaX);
+    const absY = Math.abs(deltaY);
+    if (absY < 48 && absX < 48) return;
+
+    // Prefer the dominant axis: vertical swipe changes section (same as wheel).
+    if (absY >= absX) {
+      onSelectSection(activeIndex + (deltaY > 0 ? -1 : 1));
+      return;
+    }
+
+    onSelectSection(activeIndex + (deltaX > 0 ? -1 : 1));
+  };
 
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -194,7 +220,14 @@ export function MenuOverlay({
         />
       </div>
 
-      <div className="menuStage">
+      <div
+        className="menuStage"
+        onPointerDown={handleStagePointerDown}
+        onPointerUp={handleStagePointerUp}
+        onPointerCancel={() => {
+          swipeStartRef.current = null;
+        }}
+      >
         <button
           className="menuClose"
           type="button"

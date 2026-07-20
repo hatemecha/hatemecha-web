@@ -44,6 +44,7 @@ export function SectionPage({ sectionId, onBackToMenu }: SectionPageProps) {
               href={link.href}
               target="_blank"
               rel="noopener noreferrer"
+              referrerPolicy="strict-origin-when-cross-origin"
             >
               {link.label}
             </a>

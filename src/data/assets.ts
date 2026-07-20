@@ -1,6 +1,6 @@
 export const visualAssets = {
   barcode: "assets/barcode-hatemecha.webp",
-  menuEyesStrip: "assets/ojos.png",
+  menuEyesStrip: "assets/ojos.webp",
   menuPhotoBlock: "assets/menu-photo-block.webp"
 } as const;
 

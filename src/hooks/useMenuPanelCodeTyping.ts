@@ -19,31 +19,16 @@ function clearCodeSnippet(element: HTMLElement) {
 }
 
 function getTypingDuration(code: string) {
-  return Math.max(1400, Math.min(4600, code.length * 38));
+  return Math.max(1200, Math.min(3600, code.length * 36));
 }
 
 function typeCodeSnippet(element: HTMLElement, code: string, delay: number) {
-  return animateCodeRange(element, code, 0, code.length, getTypingDuration(code), delay);
-}
-
-function eraseCodeSnippet(element: HTMLElement, code: string, delay: number) {
-  return animateCodeRange(element, code, code.length, 0, 900, delay);
-}
-
-function animateCodeRange(
-  element: HTMLElement,
-  code: string,
-  from: number,
-  to: number,
-  duration: number,
-  delay: number
-) {
-  const typing = { chars: from };
+  const typing = { chars: 0 };
   let lastCharCount = -1;
 
   return animate(typing, {
-    chars: to,
-    duration,
+    chars: code.length,
+    duration: getTypingDuration(code),
     delay,
     ease: "linear",
     onUpdate: () => {
@@ -54,7 +39,7 @@ function animateCodeRange(
       element.textContent = code.slice(0, charCount);
     },
     onComplete: () => {
-      element.textContent = code.slice(0, to);
+      element.textContent = code;
     }
   });
 }
@@ -104,35 +89,12 @@ export function useMenuPanelCodeTyping(
       };
     }
 
-    const runTypingLoop = () => {
-      clearAnimations(typingStateRef.current.animations);
-      clearTimeouts(typingStateRef.current.timeoutIds);
-      typingStateRef.current.animations = [];
-      typingStateRef.current.timeoutIds = [];
-      clearCodeSnippet(topEl);
-      clearCodeSnippet(bottomEl);
-
-      const topDelay = 160;
-      const bottomDelay = 520;
-      const topWriteDuration = getTypingDuration(pair.top);
-      const bottomWriteDuration = getTypingDuration(pair.bottom);
-      const writeDuration = Math.max(topDelay + topWriteDuration, bottomDelay + bottomWriteDuration);
-
-      const topAnimation = typeCodeSnippet(topEl, pair.top, topDelay);
-      const bottomAnimation = typeCodeSnippet(bottomEl, pair.bottom, bottomDelay);
-      typingStateRef.current.animations = [topAnimation, bottomAnimation];
-
-      const eraseTimeoutId = window.setTimeout(() => {
-        const topEraseAnimation = eraseCodeSnippet(topEl, pair.top, 0);
-        const bottomEraseAnimation = eraseCodeSnippet(bottomEl, pair.bottom, 140);
-        typingStateRef.current.animations = [topEraseAnimation, bottomEraseAnimation];
-      }, writeDuration + 1800);
-
-      const nextLoopTimeoutId = window.setTimeout(runTypingLoop, writeDuration + 3350);
-      typingStateRef.current.timeoutIds.push(eraseTimeoutId, nextLoopTimeoutId);
-    };
-
-    runTypingLoop();
+    // Type once per open/section — no erase/retype loop (that caused flicker).
+    clearDom();
+    typingStateRef.current.animations = [
+      typeCodeSnippet(topEl, pair.top, 160),
+      typeCodeSnippet(bottomEl, pair.bottom, 480)
+    ];
 
     return () => {
       clearDom();

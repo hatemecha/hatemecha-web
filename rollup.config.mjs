@@ -127,6 +127,16 @@ function copyStaticAssets() {
         // optional
       }
 
+      try {
+        await cp(
+          path.join(rootDirectory, "public", "site.webmanifest"),
+          path.join(distDirectory, "site.webmanifest"),
+          { force: true }
+        );
+      } catch {
+        // optional
+      }
+
       const sourceHtml = await readFile(path.join(rootDirectory, "index.html"), "utf8");
       const productionHtml = buildProductionHtml(sourceHtml);
 

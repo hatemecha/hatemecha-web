@@ -46,6 +46,7 @@ export function MusicPage({ onBackToMenu }: MusicPageProps) {
               href={album.bandcampUrl}
               target="_blank"
               rel="noopener noreferrer"
+              referrerPolicy="strict-origin-when-cross-origin"
               aria-label={`Escuchar ${album.title} en Bandcamp`}
             >
               <figure className="musicCover">
@@ -73,7 +74,12 @@ export function MusicPage({ onBackToMenu }: MusicPageProps) {
       </motion.ul>
 
       <motion.p className="musicFooter" variants={pageItemVariants}>
-        <a href={bandcampUrl} target="_blank" rel="noopener noreferrer">
+        <a
+          href={bandcampUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          referrerPolicy="strict-origin-when-cross-origin"
+        >
           ver todo en bandcamp
         </a>
       </motion.p>

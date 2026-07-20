@@ -38,6 +38,7 @@ export function Hero({
           href={socialLinks.github}
           target="_blank"
           rel="noopener noreferrer"
+          referrerPolicy="strict-origin-when-cross-origin"
           aria-label="GitHub"
         >
           <svg className="heroSocialIcon" viewBox="0 0 24 24" aria-hidden="true">
@@ -56,6 +57,7 @@ export function Hero({
           href={socialLinks.instagram}
           target="_blank"
           rel="noopener noreferrer"
+          referrerPolicy="strict-origin-when-cross-origin"
           aria-label="Instagram"
         >
           <svg className="heroSocialIcon" viewBox="0 0 24 24" aria-hidden="true">
