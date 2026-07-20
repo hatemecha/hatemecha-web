@@ -1,7 +1,8 @@
 import { useEffect, useRef, type ComponentPropsWithoutRef } from "react";
 import { animate } from "animejs/animation";
 
-const SCRAMBLE_GLYPHS = "アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789/#%+-";
+/** ASCII only — CJK glyphs fall back to wider system fonts and blow the box. */
+const SCRAMBLE_GLYPHS = "ABCDEFGHJKLMNPQRSTUVWXYZ0123456789#%+/=*<>";
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 
 type ScrambleTextProps = Omit<ComponentPropsWithoutRef<"p">, "children"> & {
@@ -19,21 +20,33 @@ function getScrambledGlyph(index: number, frame: number) {
   return SCRAMBLE_GLYPHS[(index * 11 + frame * 7) % SCRAMBLE_GLYPHS.length] ?? "";
 }
 
-function buildScrambledText(text: string, revealedCount: number, frame: number) {
-  const revealEnd = Math.min(revealedCount, text.length);
-  const scrambleEnd = Math.min(text.length, revealEnd + 6);
-  let nextText = text.slice(0, revealEnd);
+/** Always returns `text.length` chars; spaces/newlines stay put. */
+function buildDecodeText(text: string, revealedCount: number, frame: number) {
+  const revealEnd = Math.min(Math.max(0, revealedCount), text.length);
+  let nextText = "";
 
-  for (let index = revealEnd; index < scrambleEnd; index += 1) {
-    const character = text[index];
-    nextText += character === " " ? " " : getScrambledGlyph(index, frame);
+  for (let index = 0; index < text.length; index += 1) {
+    const character = text[index] ?? "";
+    if (character === " " || character === "\n") {
+      nextText += character;
+      continue;
+    }
+
+    nextText += index < revealEnd ? character : getScrambledGlyph(index, frame);
   }
 
   return nextText;
 }
 
-export function ScrambleText({ active = true, delay = 0, replayKey, text, ...props }: ScrambleTextProps) {
-  const textRef = useRef<HTMLParagraphElement>(null);
+export function ScrambleText({
+  active = true,
+  className,
+  delay = 0,
+  replayKey,
+  text,
+  ...props
+}: ScrambleTextProps) {
+  const textRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     const textElement = textRef.current;
@@ -41,7 +54,6 @@ export function ScrambleText({ active = true, delay = 0, replayKey, text, ...pro
 
     if (!active) {
       textElement.textContent = text;
-      textElement.setAttribute("aria-label", text);
       return undefined;
     }
 
@@ -51,38 +63,47 @@ export function ScrambleText({ active = true, delay = 0, replayKey, text, ...pro
     }
 
     let frame = 0;
-    let lastRevealedCount = -1;
+    let rafId = 0;
     const state = { chars: 0 };
-    textElement.textContent = "";
-    textElement.setAttribute("aria-label", text);
+
+    textElement.textContent = buildDecodeText(text, 0, 0);
+
+    const tickScramble = () => {
+      frame += 1;
+      const revealedCount = Math.floor(state.chars);
+      textElement.textContent = buildDecodeText(text, revealedCount, frame);
+      if (revealedCount < text.length) {
+        rafId = window.requestAnimationFrame(tickScramble);
+      }
+    };
+    rafId = window.requestAnimationFrame(tickScramble);
 
     const animation = animate(state, {
       chars: text.length,
       delay,
       duration: getTextDuration(text),
       ease: "out(3)",
-      onUpdate: () => {
-        const revealedCount = Math.floor(state.chars);
-        if (revealedCount === lastRevealedCount) return;
-
-        lastRevealedCount = revealedCount;
-        frame += 1;
-        textElement.textContent = buildScrambledText(text, revealedCount, frame);
-      },
       onComplete: () => {
+        window.cancelAnimationFrame(rafId);
         textElement.textContent = text;
       }
     });
 
     return () => {
+      window.cancelAnimationFrame(rafId);
       animation.revert();
       textElement.textContent = text;
     };
   }, [active, delay, replayKey, text]);
 
+  // Slot locks layout to final text; FX paints decode on top (clipped).
   return (
-    <p ref={textRef} {...props}>
-      {text}
+    <p {...props} className={["scrambleText", className].filter(Boolean).join(" ")}>
+      <span className="srOnly">{text}</span>
+      <span aria-hidden="true" className="scrambleTextSlot">
+        {text}
+      </span>
+      <span aria-hidden="true" className="scrambleTextFx" ref={textRef} />
     </p>
   );
 }
