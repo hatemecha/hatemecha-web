@@ -19,6 +19,20 @@ const fluidEase = [0.22, 1, 0.36, 1] as const;
 const minimumGalleryTileCount = 440;
 const panLerp = 0.12;
 
+/** Enough tiles to fill the oversized pan grid (270vw × 250svh) so edges never show empty black. */
+function estimateFilledGalleryTileCount() {
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+  const gridWidth = Math.max(viewportWidth * 2.7, 2800);
+  const trackMin = Math.min(166, Math.max(96, viewportWidth * 0.098));
+  const gap = Math.min(5, Math.max(2, viewportWidth * 0.0028));
+  const columns = Math.max(1, Math.floor((gridWidth + gap) / (trackMin + gap)));
+  const rowHeight = Math.min(160, Math.max(86, viewportHeight * 0.126));
+  const targetHeight = viewportHeight * 2.5;
+  const rows = Math.max(1, Math.ceil((targetHeight + gap) / (rowHeight + gap)));
+  return columns * (rows + 1);
+}
+
 function getGridColumnCount(grid: HTMLElement) {
   return Math.max(1, getComputedStyle(grid).gridTemplateColumns.split(" ").filter(Boolean).length);
 }
@@ -112,10 +126,18 @@ export function GalleryPage({ onBackToMenu }: GalleryPageProps) {
   const rafRef = useRef<number | null>(null);
   const activeItem = activeIndex === null ? null : galleryItems[activeIndex] ?? null;
 
+  const [tileCountFloor, setTileCountFloor] = useState(() =>
+    typeof window === "undefined" ? minimumGalleryTileCount : estimateFilledGalleryTileCount()
+  );
+
   const galleryDisplayItems = useMemo(() => {
     if (galleryItems.length === 0) return [];
 
-    const displayCount = Math.max(minimumGalleryTileCount, galleryItems.length * 10);
+    const displayCount = Math.max(
+      minimumGalleryTileCount,
+      galleryItems.length * 10,
+      tileCountFloor
+    );
     return Array.from({ length: displayCount }, (_, displayIndex) => {
       const sourceIndex = (displayIndex * 17) % galleryItems.length;
       return {
@@ -124,7 +146,7 @@ export function GalleryPage({ onBackToMenu }: GalleryPageProps) {
         item: galleryItems[sourceIndex]
       };
     });
-  }, []);
+  }, [tileCountFloor]);
 
   const lightboxLabel = useMemo(() => {
     if (activeIndex === null || !activeItem) return undefined;
@@ -337,11 +359,19 @@ export function GalleryPage({ onBackToMenu }: GalleryPageProps) {
     });
 
     observer.observe(grid);
+
+    const syncTileFloor = () => {
+      const needed = estimateFilledGalleryTileCount();
+      setTileCountFloor((current) => (needed > current ? needed : current));
+    };
+
     window.addEventListener("resize", refreshTilesCache);
+    window.addEventListener("resize", syncTileFloor);
 
     return () => {
       observer.disconnect();
       window.removeEventListener("resize", refreshTilesCache);
+      window.removeEventListener("resize", syncTileFloor);
     };
   }, [galleryDisplayItems.length, refreshTilesCache, startInteractionLoop, updatePanTargets]);
 
