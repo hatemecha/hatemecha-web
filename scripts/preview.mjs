@@ -52,8 +52,16 @@ const server = createServer(async (request, response) => {
     response.writeHead(200, { "Content-Type": getContentType(finalPath) });
     response.end(body);
   } catch {
-    response.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
-    response.end("Not found");
+    try {
+      const fallbackPath = path.join(rootRealPath, "404.html");
+      assertPathInsideRoot(await realpath(fallbackPath));
+      const body = await readFile(fallbackPath);
+      response.writeHead(404, { "Content-Type": "text/html; charset=utf-8" });
+      response.end(body);
+    } catch {
+      response.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
+      response.end("Not found");
+    }
   }
 });
 

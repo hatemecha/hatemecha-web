@@ -141,6 +141,8 @@ function copyStaticAssets() {
       const productionHtml = buildProductionHtml(sourceHtml);
 
       await writeFile(path.join(distDirectory, "index.html"), productionHtml);
+      // GH Pages serves this for unknown paths under the project base.
+      await writeFile(path.join(distDirectory, "404.html"), productionHtml);
     }
   };
 }

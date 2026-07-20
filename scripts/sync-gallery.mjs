@@ -12,7 +12,7 @@ const legacyMastersDirectory = path.join(rootDirectory, "public", "galeria", "ma
 const manifestPath = path.join(rootDirectory, "src", "data", "galleryManifest.ts");
 const supportedExtensions = new Set([".avif", ".jpeg", ".jpg", ".png", ".tif", ".tiff", ".webp"]);
 /** Lightbox/display max edge — kept modest for GH Pages weight (~was 2400 masters). */
-const VIEW_MAX_EDGE = 1600;
+const VIEW_MAX_EDGE = 1200;
 const THUMB_WIDTH = 420;
 
 function getPublicUrl(...segments) {
@@ -153,7 +153,7 @@ async function syncGallery() {
   for (const filename of files) {
     const id = getStableId(filename);
     const baseName = `${slugifyFilename(filename)}-${id}`;
-    const viewFilename = `${baseName}.webp`;
+    const viewFilename = `${baseName}-1200.webp`;
     const thumbFilename = `${baseName}.webp`;
     const sourcePath = path.join(sourceDirectory, filename);
     const viewPath = path.join(viewDirectory, viewFilename);
@@ -164,22 +164,20 @@ async function syncGallery() {
     const needsThumb = await isNewerThan(sourcePath, thumbPath);
 
     if (needsView) {
-      await writeWebpAtomic(
-        `${viewPath}.tmp.webp`,
-        viewPath,
-        sharp(sourcePath)
-          .rotate()
-          .resize({
-            width: VIEW_MAX_EDGE,
-            height: VIEW_MAX_EDGE,
-            fit: "inside",
-            withoutEnlargement: true
-          })
-          .webp({
-            effort: 5,
-            quality: 78
-          })
-      );
+      // Write directly to the final path when possible; Windows/Vite may lock older files.
+      await sharp(sourcePath)
+        .rotate()
+        .resize({
+          width: VIEW_MAX_EDGE,
+          height: VIEW_MAX_EDGE,
+          fit: "inside",
+          withoutEnlargement: true
+        })
+        .webp({
+          effort: 5,
+          quality: 78
+        })
+        .toFile(viewPath);
     }
 
     if (needsThumb) {
