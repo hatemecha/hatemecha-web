@@ -48,7 +48,7 @@ export function MenuOverlay({
 }: MenuOverlayProps) {
   const codeTopRef = useRef<HTMLPreElement>(null);
   const codeBottomRef = useRef<HTMLPreElement>(null);
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const enterButtonRef = useRef<HTMLButtonElement>(null);
   const activeSection = sections[activeIndex];
 
   if (!activeSection) {
@@ -75,7 +75,7 @@ export function MenuOverlay({
     const previouslyFocusedElement =
       document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const focusFrameId = window.requestAnimationFrame(() => {
-      closeButtonRef.current?.focus();
+      enterButtonRef.current?.focus();
     });
 
     const handleFocusTrap = (event: KeyboardEvent) => {
@@ -175,7 +175,7 @@ export function MenuOverlay({
         <ScrambleText
           id="menu-controls-hint"
           className="menuControlsHint"
-          text="↑↓ ←→ · WASD · rueda"
+          text="↑↓ ←→ · WASD · enter · rueda"
           active={isOpen}
           delay={220}
           replayKey={isOpen ? "menu-controls-open" : "menu-controls-closed"}
@@ -189,7 +189,6 @@ export function MenuOverlay({
           type="button"
           onClick={onCloseMenu}
           aria-label="Cerrar menú"
-          ref={closeButtonRef}
         >
           x
         </button>
@@ -224,6 +223,7 @@ export function MenuOverlay({
             type="button"
             aria-label={`Entrar en ${activeSection.label}`}
             onClick={onEnterSection}
+            ref={enterButtonRef}
             data-menu-in
           >
             enter

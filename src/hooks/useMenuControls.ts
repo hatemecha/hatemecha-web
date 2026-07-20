@@ -4,6 +4,7 @@ type UseMenuControlsArgs = {
   isOpen: boolean;
   openMenu: () => void;
   closeMenu: () => void;
+  enterSection: () => void;
   activatePrevious: () => void;
   activateNext: () => void;
 };
@@ -43,6 +44,7 @@ export function useMenuControls({
   isOpen,
   openMenu,
   closeMenu,
+  enterSection,
   activatePrevious,
   activateNext
 }: UseMenuControlsArgs) {
@@ -63,6 +65,12 @@ export function useMenuControls({
         return;
       }
 
+      if (event.key === "Enter" && !isEditableTarget(event.target)) {
+        event.preventDefault();
+        enterSection();
+        return;
+      }
+
       if (!isEditableTarget(event.target) && NEXT_KEYS.has(event.key)) {
         event.preventDefault();
         activateNext();
@@ -80,7 +88,7 @@ export function useMenuControls({
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [activateNext, activatePrevious, closeMenu, isOpen, openMenu]);
+  }, [activateNext, activatePrevious, closeMenu, enterSection, isOpen, openMenu]);
 
   useEffect(() => {
     const handleWheel = (event: WheelEvent) => {

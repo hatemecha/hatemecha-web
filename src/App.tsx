@@ -183,6 +183,7 @@ export default function App() {
     isOpen: isMenuOpen,
     openMenu,
     closeMenu,
+    enterSection,
     activatePrevious,
     activateNext
   });
