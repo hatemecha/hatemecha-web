@@ -66,6 +66,13 @@ export function useMenuControls({
       }
 
       if (event.key === "Enter" && !isEditableTarget(event.target)) {
+        if (event.target instanceof HTMLElement) {
+          // Native activation for close / enter controls.
+          if (event.target.closest(".menuClose, .enterButton")) {
+            return;
+          }
+        }
+
         event.preventDefault();
         enterSection();
         return;

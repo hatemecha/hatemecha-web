@@ -9,6 +9,8 @@ type MusicPageProps = {
 };
 
 export function MusicPage({ onBackToMenu }: MusicPageProps) {
+  const albumList: readonly (typeof albums)[number][] = [...albums];
+
   return (
     <PortfolioPageShell
       className="musicPage"
@@ -17,7 +19,7 @@ export function MusicPage({ onBackToMenu }: MusicPageProps) {
       kicker="音楽"
       onBackToMenu={onBackToMenu}
       contentVariants={projectsListVariants}
-      meta={<span className="galleryCount">{String(albums.length).padStart(2, "0")} albums</span>}
+      meta={<span className="galleryCount">{String(albumList.length).padStart(2, "0")} albums</span>}
     >
       <motion.p className="musicIntro" variants={pageItemVariants}>
         <ScrambleText
@@ -27,7 +29,14 @@ export function MusicPage({ onBackToMenu }: MusicPageProps) {
       </motion.p>
 
       <motion.ul className="musicGrid" aria-label="Álbumes en Bandcamp" variants={projectsListVariants}>
-        {albums.map((album, index) => {
+        {albumList.length === 0 ? (
+          <li>
+            <p className="sectionPageNote" role="status">
+              próximamente
+            </p>
+          </li>
+        ) : (
+          albumList.map((album, index) => {
           const credits = albumCredits(album);
 
           return (
@@ -59,7 +68,8 @@ export function MusicPage({ onBackToMenu }: MusicPageProps) {
             </a>
           </motion.li>
           );
-        })}
+        })
+        )}
       </motion.ul>
 
       <motion.p className="musicFooter" variants={pageItemVariants}>

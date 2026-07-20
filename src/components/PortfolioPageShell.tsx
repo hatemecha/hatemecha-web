@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { motion } from "motion/react";
 import { pageContentVariants } from "../motion/presets";
 import { useLenisScroll } from "../hooks/useLenisScroll";
@@ -30,8 +30,16 @@ export function PortfolioPageShell({
   escapeEnabled = true
 }: PortfolioPageShellProps) {
   const pageRef = useLenisScroll<HTMLElement>();
+  const titleRef = useRef<HTMLHeadingElement>(null);
 
   useEscapeKey({ enabled: escapeEnabled, onEscape: onBackToMenu });
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      titleRef.current?.focus({ preventScroll: true });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
 
   const headerClassName = [
     "galleryHeader",
@@ -53,7 +61,7 @@ export function PortfolioPageShell({
       <header className={headerClassName}>
         <div className="galleryHeaderMark">
           <ScrambleText className="galleryKicker" text={kicker} delay={80} />
-          <h1 id={titleId} className="galleryTitle">
+          <h1 id={titleId} className="galleryTitle" tabIndex={-1} ref={titleRef}>
             {title}
           </h1>
         </div>

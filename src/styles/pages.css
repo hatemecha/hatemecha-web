@@ -20,7 +20,7 @@
   right: max(env(safe-area-inset-right, 0px), 14px);
   z-index: 8;
   min-width: 72px;
-  min-height: 36px;
+  min-height: 44px;
   padding: 0 14px;
   border: 1px solid rgb(var(--accent-rgb) / 0.55);
   background: oklch(0% 0 0 / 0.72);
@@ -78,6 +78,11 @@
   text-align: center;
   text-wrap: balance;
   text-shadow: 0 8px 40px oklch(0% 0 0 / 0.85);
+}
+
+.galleryLockupTitle:focus,
+.galleryLockupTitle:focus-visible {
+  outline: none;
 }
 
 .galleryLockupJp {
@@ -198,6 +203,11 @@
   letter-spacing: 0;
   line-height: 0.76;
   text-transform: lowercase;
+}
+
+.galleryTitle:focus,
+.galleryTitle:focus-visible {
+  outline: none;
 }
 
 .galleryHeaderMeta {
@@ -580,7 +590,7 @@
   width: min(92vw, 900px);
   justify-content: space-between;
   gap: 16px;
-  color: oklch(88% 0.01 95 / 0.72);
+  color: oklch(92% 0.01 95 / 0.88);
   font-family: var(--font-mono);
   font-size: clamp(10px, 0.9vw, 13px);
   font-weight: 800;
@@ -660,6 +670,29 @@
   letter-spacing: 0.04em;
   text-transform: lowercase;
   text-wrap: pretty;
+}
+
+.sectionPageLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  margin-top: 4px;
+}
+
+.sectionPageLink {
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: clamp(12px, 1.2vw, 14px);
+  letter-spacing: 0.06em;
+  text-transform: lowercase;
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in oklch, var(--accent) 55%, transparent);
+}
+
+.sectionPageLink:hover,
+.sectionPageLink:focus-visible {
+  color: var(--fg);
+  border-bottom-color: var(--fg);
 }
 
 .musicPage,

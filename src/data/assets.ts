@@ -7,24 +7,24 @@ export const visualAssets = {
 /** Fotos del menú home — pinout a la derecha (label = silkscreen). */
 export const homeMenuScatterPhotos = [
   {
-    src: "assets/home1.webp",
+    src: "assets/home1-sm.webp",
     label: "img:01",
     slot: "one",
-    width: 2667,
-    height: 4000
+    width: 900,
+    height: 1350
   },
   {
-    src: "assets/home2.webp",
+    src: "assets/home2-sm.webp",
     label: "img:02",
     slot: "two",
-    width: 6000,
-    height: 4000
+    width: 900,
+    height: 600
   },
   {
-    src: "assets/home3.webp",
+    src: "assets/home3-sm.webp",
     label: "img:03",
     slot: "three",
-    width: 4713,
-    height: 3142
+    width: 900,
+    height: 600
   }
 ] as const;

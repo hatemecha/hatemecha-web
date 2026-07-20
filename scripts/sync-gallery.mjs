@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { mkdir, readdir, stat, writeFile } from "node:fs/promises";
+import { mkdir, readdir, stat, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
@@ -162,7 +162,27 @@ async function syncGallery() {
   }
 
   await writeFile(manifestPath, buildManifest(items));
-  console.log(`gallery: synced ${items.length} image${items.length === 1 ? "" : "s"} from !PORTFOLIO`);
+
+  const keepMasters = new Set(items.map((item) => path.basename(item.src)));
+  const keepThumbs = new Set(items.map((item) => path.basename(item.thumbSrc)));
+  let pruned = 0;
+
+  for (const filename of await readdir(mastersDirectory)) {
+    if (!filename.endsWith(".webp") || keepMasters.has(filename)) continue;
+    await unlink(path.join(mastersDirectory, filename));
+    pruned += 1;
+  }
+
+  for (const filename of await readdir(thumbsDirectory)) {
+    if (!filename.endsWith(".webp") || keepThumbs.has(filename)) continue;
+    await unlink(path.join(thumbsDirectory, filename));
+    pruned += 1;
+  }
+
+  console.log(
+    `gallery: synced ${items.length} image${items.length === 1 ? "" : "s"} from !PORTFOLIO` +
+      (pruned > 0 ? ` (pruned ${pruned} orphan${pruned === 1 ? "" : "s"})` : "")
+  );
 }
 
 syncGallery().catch((error) => {

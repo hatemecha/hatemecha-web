@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { acercaPageContent } from "../data/acercaContent";
 import { portfolioSections, type PortfolioSectionId } from "../data/portfolioSections";
 import { pageItemVariants } from "../motion/presets";
 import { PortfolioPageShell } from "./PortfolioPageShell";
@@ -30,7 +31,24 @@ export function SectionPage({ sectionId, onBackToMenu }: SectionPageProps) {
     >
       <motion.div className="sectionPageBody" variants={pageItemVariants}>
         <ScrambleText className="sectionPageCopy" text={section.copy} delay={160} />
-        <p className="sectionPageNote">contenido en progreso — volvé al menú para seguir explorando.</p>
+        {acercaPageContent.paragraphs.map((paragraph) => (
+          <p className="sectionPageNote" key={paragraph}>
+            {paragraph}
+          </p>
+        ))}
+        <nav className="sectionPageLinks" aria-label="Contacto">
+          {acercaPageContent.links.map((link) => (
+            <a
+              key={link.href}
+              className="sectionPageLink"
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {link.label}
+            </a>
+          ))}
+        </nav>
       </motion.div>
     </PortfolioPageShell>
   );

@@ -18,7 +18,7 @@
   }
 
   .signalSlot {
-    height: clamp(26px, 6vw, 34px);
+    height: clamp(44px, 6vw, 48px);
     font-size: clamp(10px, 3.1vw, 15px);
   }
 
@@ -81,7 +81,7 @@
     max-width: calc(100% - 8px);
     font-size: clamp(7px, 2vw, 9px);
     letter-spacing: 0.1em;
-    color: oklch(72% 0.02 95 / 0.34);
+    color: oklch(82% 0.02 95 / 0.72);
   }
 
   .floatingImages {
@@ -344,7 +344,7 @@
 
   .galleryLightboxNav {
     top: auto;
-    bottom: 16px;
+    bottom: max(16px, env(safe-area-inset-bottom));
     min-width: 84px;
   }
 }

@@ -18,6 +18,7 @@ function ProjectMediaStrip({ label, images }: ProjectMediaStripProps) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const pausedRef = useRef(false);
+  const offscreenRef = useRef(false);
   const offsetRef = useRef(0);
 
   useEffect(() => {
@@ -46,8 +47,9 @@ function ProjectMediaStrip({ label, images }: ProjectMediaStripProps) {
       const delta = Math.min(0.048, (now - lastTime) / 1000);
       lastTime = now;
       const maxScroll = Math.max(0, track.scrollWidth - viewport.clientWidth);
+      const isPaused = pausedRef.current || offscreenRef.current;
 
-      if (!pausedRef.current && maxScroll > 2 && now >= edgeHoldUntil) {
+      if (!isPaused && maxScroll > 2 && now >= edgeHoldUntil) {
         let next = offsetRef.current + direction * speedPxPerSec * delta;
 
         if (next >= maxScroll) {
@@ -68,8 +70,17 @@ function ProjectMediaStrip({ label, images }: ProjectMediaStripProps) {
 
     frame = window.requestAnimationFrame(tick);
 
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        offscreenRef.current = !(entry?.isIntersecting ?? true);
+      },
+      { root: null, threshold: 0.05 }
+    );
+    observer.observe(viewport);
+
     return () => {
       window.cancelAnimationFrame(frame);
+      observer.disconnect();
     };
   }, [images]);
 
@@ -108,6 +119,8 @@ function ProjectMediaStrip({ label, images }: ProjectMediaStripProps) {
 }
 
 export function ProjectsPage({ onBackToMenu }: ProjectsPageProps) {
+  const projectList: readonly (typeof projects)[number][] = [...projects];
+
   return (
     <PortfolioPageShell
       className="projectsPage"
@@ -118,7 +131,12 @@ export function ProjectsPage({ onBackToMenu }: ProjectsPageProps) {
       contentVariants={projectsListVariants}
     >
       <motion.div className="projectsList" aria-label="Proyectos publicados" variants={projectsListVariants}>
-        {projects.map((project, index) => {
+        {projectList.length === 0 ? (
+          <p className="sectionPageNote" role="status">
+            próximamente
+          </p>
+        ) : (
+          projectList.map((project, index) => {
           const indexLabel = String(index + 1).padStart(2, "0");
           const mediaSide = index % 2 === 0 ? "end" : "start";
 
@@ -155,7 +173,8 @@ export function ProjectsPage({ onBackToMenu }: ProjectsPageProps) {
               </div>
             </motion.section>
           );
-        })}
+        })
+        )}
       </motion.div>
     </PortfolioPageShell>
   );

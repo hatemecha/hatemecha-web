@@ -29,6 +29,9 @@ export function Hero({
       inert={isMenuOpen}
       ref={heroRef}
     >
+      <a className="skipLink" href="#hero-open-menu">
+        Saltar a abrir menú
+      </a>
       <div className="heroTopBar" data-hero-in>
         <a
           className="heroSocialLink"
@@ -82,7 +85,7 @@ export function Hero({
           </span>
         </h1>
 
-        <div className="signalSlots" aria-label="Modos visuales" data-hero-in>
+        <div className="signalSlots" aria-label="Abrir menú" data-hero-in>
           <button
             className="signalSlot signalSlotEyes"
             type="button"
@@ -105,6 +108,7 @@ export function Hero({
       <button
         className="menuArrow"
         type="button"
+        id="hero-open-menu"
         aria-label="Abrir menú"
         onClick={onOpenMenu}
         ref={arrowRef}

@@ -3,37 +3,37 @@ export const portfolioSections = [
     id: "home",
     label: "home",
     jaLabel: "ホーム",
-    copy: "Esta pagina funciona como glosario"
+    copy: "Esta página funciona como glosario"
   },
   {
     id: "proyectos",
     label: "proyectos",
     jaLabel: "プロジェクト",
-    copy: "flyers / disenos / branding"
+    copy: "flyers / diseños / branding"
   },
   {
     id: "cv-skills",
     label: "cv & skills",
     jaLabel: "履歴とスキル",
-    copy: "flyers, disenos, branding, produccion musical, dibujo, fotografia y mas"
+    copy: "flyers, diseños, branding, producción musical, dibujo, fotografía y más"
   },
   {
     id: "galeria",
     label: "galeria",
     jaLabel: "ギャラリー",
-    copy: "dibujo / fotografia"
+    copy: "dibujo / fotografía"
   },
   {
     id: "musica",
     label: "musica",
     jaLabel: "音楽",
-    copy: "produccion musical"
+    copy: "producción musical"
   },
   {
     id: "acerca",
     label: "acerca de",
     jaLabel: "自己紹介",
-    copy: "underground de bahia blanca"
+    copy: "underground de Bahía Blanca"
   }
 ] as const;
 

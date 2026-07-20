@@ -1,4 +1,4 @@
-import { useCallback, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { CvSkillsPage } from "./components/CvSkillsPage";
 import { GalleryPage } from "./components/GalleryPage";
@@ -17,6 +17,13 @@ import { useAnimeMotion } from "./hooks/useAnimeMotion";
 import { useMeasuredTitleSlots } from "./hooks/useMeasuredTitleSlots";
 import { useMenuControls } from "./hooks/useMenuControls";
 import { viewMotion } from "./motion/presets";
+import {
+  applyDocumentTitle,
+  parseAppHash,
+  sectionIndexForId,
+  writeAppHash,
+  type AppHashLocation
+} from "./routing/appHashRoute";
 
 const sectionCount: number = portfolioSections.length;
 
@@ -30,6 +37,29 @@ function getNormalizedSectionIndex(index: number) {
   }
 
   return normalizePortfolioSectionIndex(index);
+}
+
+function stateFromLocation(location: AppHashLocation) {
+  switch (location.kind) {
+    case "home":
+      return { activeView: "home" as const, isMenuOpen: false, activeIndex: 0 };
+    case "menu":
+      return {
+        activeView: "home" as const,
+        isMenuOpen: true,
+        activeIndex: sectionIndexForId(location.sectionId)
+      };
+    case "view":
+      return {
+        activeView: location.view,
+        isMenuOpen: false,
+        activeIndex: getSectionIndexForView(location.view)
+      };
+    default: {
+      const _exhaustive: never = location;
+      return _exhaustive;
+    }
+  }
 }
 
 type ViewHandlers = {
@@ -122,25 +152,52 @@ function renderActiveView(activeView: AppView, handlers: ViewHandlers): ReactNod
 }
 
 export default function App() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [activeView, setActiveView] = useState<AppView>("home");
+  const initialLocation = parseAppHash();
+  const initialState = stateFromLocation(initialLocation);
+  const [isMenuOpen, setIsMenuOpen] = useState(initialState.isMenuOpen);
+  const [activeIndex, setActiveIndex] = useState(initialState.activeIndex);
+  const [activeView, setActiveView] = useState<AppView>(initialState.activeView);
   const { hateRef, mechaRef, slotStyle } = useMeasuredTitleSlots();
   const { heroRef, menuRef, arrowRef, pulseArrow } = useAnimeMotion(isMenuOpen, activeIndex);
 
+  useEffect(() => {
+    applyDocumentTitle(parseAppHash());
+
+    const syncFromHash = () => {
+      const next = stateFromLocation(parseAppHash());
+      setActiveView(next.activeView);
+      setIsMenuOpen(next.isMenuOpen);
+      setActiveIndex(next.activeIndex);
+      applyDocumentTitle(parseAppHash());
+    };
+
+    window.addEventListener("hashchange", syncFromHash);
+    return () => window.removeEventListener("hashchange", syncFromHash);
+  }, []);
+
   const openMenu = useCallback(() => {
     pulseArrow();
+    const section = portfolioSections[activeIndex] ?? portfolioSections[0];
     setIsMenuOpen(true);
-  }, [pulseArrow]);
+    writeAppHash({ kind: "menu", sectionId: section!.id }, "push");
+  }, [activeIndex, pulseArrow]);
 
   const closeMenu = useCallback(() => {
     setIsMenuOpen(false);
+    writeAppHash({ kind: "home", menuOpen: false }, "push");
   }, []);
 
   const returnToSectionMenu = useCallback((sectionIndex: number) => {
-    setActiveIndex(sectionIndex);
+    const normalized = getNormalizedSectionIndex(sectionIndex);
+    const section = portfolioSections[normalized];
+    if (!section) {
+      throw new Error(`Invalid portfolio section index: ${normalized}`);
+    }
+
+    setActiveIndex(normalized);
     setActiveView("home");
     setIsMenuOpen(true);
+    writeAppHash({ kind: "menu", sectionId: section.id }, "push");
   }, []);
 
   const enterSection = useCallback(() => {
@@ -155,10 +212,12 @@ export default function App() {
     switch (enterAction.type) {
       case "close-menu":
         setIsMenuOpen(false);
+        writeAppHash({ kind: "home", menuOpen: false }, "push");
         return;
       case "open-view":
         setActiveView(enterAction.view);
         setIsMenuOpen(false);
+        writeAppHash({ kind: "view", view: enterAction.view }, "push");
         return;
       default: {
         const _exhaustive: never = enterAction;
@@ -168,16 +227,38 @@ export default function App() {
   }, [activeIndex]);
 
   const activatePrevious = useCallback(() => {
-    setActiveIndex((currentIndex) => getNormalizedSectionIndex(currentIndex - 1));
-  }, []);
+    setActiveIndex((currentIndex) => {
+      const next = getNormalizedSectionIndex(currentIndex - 1);
+      const section = portfolioSections[next];
+      if (section && isMenuOpen) {
+        writeAppHash({ kind: "menu", sectionId: section.id }, "replace");
+      }
+      return next;
+    });
+  }, [isMenuOpen]);
 
   const activateNext = useCallback(() => {
-    setActiveIndex((currentIndex) => getNormalizedSectionIndex(currentIndex + 1));
-  }, []);
+    setActiveIndex((currentIndex) => {
+      const next = getNormalizedSectionIndex(currentIndex + 1);
+      const section = portfolioSections[next];
+      if (section && isMenuOpen) {
+        writeAppHash({ kind: "menu", sectionId: section.id }, "replace");
+      }
+      return next;
+    });
+  }, [isMenuOpen]);
 
-  const selectSection = useCallback((index: number) => {
-    setActiveIndex(getNormalizedSectionIndex(index));
-  }, []);
+  const selectSection = useCallback(
+    (index: number) => {
+      const next = getNormalizedSectionIndex(index);
+      const section = portfolioSections[next];
+      setActiveIndex(next);
+      if (section && isMenuOpen) {
+        writeAppHash({ kind: "menu", sectionId: section.id }, "replace");
+      }
+    },
+    [isMenuOpen]
+  );
 
   useMenuControls({
     isOpen: isMenuOpen,

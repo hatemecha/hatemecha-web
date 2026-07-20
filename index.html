@@ -21,7 +21,7 @@
     />
     <meta
       property="og:image"
-      content="https://hatemecha.github.io/hatemecha-web/assets/hatemecha-bg-blur-noise.webp"
+      content="https://hatemecha.github.io/hatemecha-web/assets/og-card.webp"
     />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Hatemecha — diseño, foto y proyectos" />
@@ -31,8 +31,11 @@
     />
     <meta
       name="twitter:image"
-      content="https://hatemecha.github.io/hatemecha-web/assets/hatemecha-bg-blur-noise.webp"
+      content="https://hatemecha.github.io/hatemecha-web/assets/og-card.webp"
     />
+    <link rel="icon" href="assets/favicon.ico" sizes="any" />
+    <link rel="icon" href="assets/favicon-32.png" type="image/png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" sizes="180x180" />
     <link rel="icon" href="assets/barcode-hatemecha.webp" type="image/webp" />
     <link
       rel="preload"
@@ -41,11 +44,13 @@
       type="image/webp"
       fetchpriority="high"
     />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preload" href="assets/fonts/bebas-neue-latin.woff2" as="font" type="font/woff2" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&display=swap"
-      rel="stylesheet"
+      rel="preload"
+      href="assets/fonts/share-tech-mono-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
     />
     <script type="application/ld+json">
       {
@@ -55,7 +60,8 @@
         "url": "https://hatemecha.github.io/hatemecha-web/",
         "sameAs": [
           "https://github.com/hatemecha",
-          "https://www.instagram.com/hatemecha/"
+          "https://www.instagram.com/hatemecha/",
+          "https://hatemecha.bandcamp.com/"
         ],
         "jobTitle": "Diseñador / fotógrafo",
         "address": {

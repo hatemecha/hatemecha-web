@@ -1,5 +1,5 @@
 import type { CSSProperties, RefObject } from "react";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMenuPanelCodeTyping } from "../hooks/useMenuPanelCodeTyping";
 import { normalizePortfolioSectionIndex, type PortfolioSection } from "../data/portfolioSections";
 import { FloatingImages } from "./FloatingImages";
@@ -8,6 +8,7 @@ import { ScrambleText } from "./ScrambleText";
 const CAROUSEL_RADIUS = 4;
 const CAROUSEL_OPACITY_BY_DISTANCE = [1, 0.34, 0.18, 0.085, 0.035] as const;
 const MENU_TITLE_ID = "menu-active-title";
+const COARSE_POINTER_QUERY = "(pointer: coarse)";
 const FOCUSABLE_SELECTOR = [
   "a[href]",
   "button:not([disabled])",
@@ -50,6 +51,17 @@ export function MenuOverlay({
   const codeBottomRef = useRef<HTMLPreElement>(null);
   const enterButtonRef = useRef<HTMLButtonElement>(null);
   const activeSection = sections[activeIndex];
+  const [controlsHint, setControlsHint] = useState("↑↓ ←→ · WASD · enter · rueda");
+
+  useEffect(() => {
+    const media = window.matchMedia(COARSE_POINTER_QUERY);
+    const syncHint = () => {
+      setControlsHint(media.matches ? "tocá la lista · enter" : "↑↓ ←→ · WASD · enter · rueda");
+    };
+    syncHint();
+    media.addEventListener("change", syncHint);
+    return () => media.removeEventListener("change", syncHint);
+  }, []);
 
   if (!activeSection) {
     throw new Error(`Invalid active portfolio section index: ${activeIndex}`);
@@ -155,8 +167,7 @@ export function MenuOverlay({
                 className="menuRailItem"
                 type="button"
                 key={`slot-${offset}`}
-                aria-current={isSelected ? "page" : undefined}
-                aria-selected={isSelected}
+                aria-current={isSelected ? "true" : undefined}
                 tabIndex={isSelected ? 0 : -1}
                 data-distance={distance}
                 style={
@@ -175,10 +186,10 @@ export function MenuOverlay({
         <ScrambleText
           id="menu-controls-hint"
           className="menuControlsHint"
-          text="↑↓ ←→ · WASD · enter · rueda"
+          text={controlsHint}
           active={isOpen}
           delay={220}
-          replayKey={isOpen ? "menu-controls-open" : "menu-controls-closed"}
+          replayKey={isOpen ? `menu-controls-open-${controlsHint}` : "menu-controls-closed"}
           data-menu-in
         />
       </div>
@@ -193,7 +204,7 @@ export function MenuOverlay({
           x
         </button>
 
-        <article className="menuPanel" aria-live="polite">
+        <article className="menuPanel">
           <pre
             ref={codeTopRef}
             className="menuCodeSnippet menuCodeSnippetTop"
@@ -207,7 +218,7 @@ export function MenuOverlay({
             replayKey={`${activeSection.id}-${isOpen ? "open" : "closed"}`}
             data-menu-in
           />
-          <h2 id={MENU_TITLE_ID} className="menuTitle" data-menu-in>
+          <h2 id={MENU_TITLE_ID} className="menuTitle" data-menu-in aria-live="polite">
             {activeSection.label}
           </h2>
           <ScrambleText

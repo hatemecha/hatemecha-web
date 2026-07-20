@@ -9,7 +9,6 @@ import {
 } from "react";
 import { motion } from "motion/react";
 import { galleryItems } from "../data/galleryManifest";
-import { useLenisScroll } from "../hooks/useLenisScroll";
 
 type GalleryPageProps = {
   onBackToMenu: () => void;
@@ -17,7 +16,16 @@ type GalleryPageProps = {
 
 const fluidEase = [0.22, 1, 0.36, 1] as const;
 const minimumGalleryTileCount = 440;
+const gallerySourceRepeats = 10;
 const panLerp = 0.12;
+const FOCUSABLE_SELECTOR = [
+  "a[href]",
+  "button:not([disabled])",
+  "input:not([disabled])",
+  "select:not([disabled])",
+  "textarea:not([disabled])",
+  "[tabindex]:not([tabindex='-1'])"
+].join(",");
 
 /** Enough tiles to fill the oversized pan grid (270vw × 250svh) so edges never show empty black. */
 function estimateFilledGalleryTileCount() {
@@ -90,31 +98,15 @@ function applyTileGlow(
   }
 }
 
-function findNearestTileIndex(clientX: number, clientY: number, tiles: HTMLElement[]) {
-  let nearestIndex = -1;
-  let nearestDistance = Number.POSITIVE_INFINITY;
-
-  tiles.forEach((tile, index) => {
-    const rect = tile.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    const distance = (clientX - centerX) ** 2 + (clientY - centerY) ** 2;
-
-    if (distance < nearestDistance) {
-      nearestDistance = distance;
-      nearestIndex = index;
-    }
-  });
-
-  return nearestIndex;
-}
-
 export function GalleryPage({ onBackToMenu }: GalleryPageProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [lockupFaded, setLockupFaded] = useState(false);
-  const pageRef = useLenisScroll<HTMLElement>();
+  const pageRef = useRef<HTMLElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const lockupRef = useRef<HTMLDivElement>(null);
+  const lightboxRef = useRef<HTMLDivElement>(null);
+  const lightboxCloseRef = useRef<HTMLButtonElement>(null);
   const tilesRef = useRef<HTMLElement[]>([]);
   const hotIndexRef = useRef<number | null>(null);
   const columnsRef = useRef(1);
@@ -124,6 +116,7 @@ export function GalleryPage({ onBackToMenu }: GalleryPageProps) {
   const panTargetRef = useRef({ x: 0, y: 0 });
   const pointerInsideRef = useRef(false);
   const rafRef = useRef<number | null>(null);
+  const lightboxReturnFocusRef = useRef<HTMLElement | null>(null);
   const activeItem = activeIndex === null ? null : galleryItems[activeIndex] ?? null;
 
   const [tileCountFloor, setTileCountFloor] = useState(() =>
@@ -135,7 +128,7 @@ export function GalleryPage({ onBackToMenu }: GalleryPageProps) {
 
     const displayCount = Math.max(
       minimumGalleryTileCount,
-      galleryItems.length * 10,
+      galleryItems.length * gallerySourceRepeats,
       tileCountFloor
     );
     return Array.from({ length: displayCount }, (_, displayIndex) => {
@@ -150,7 +143,7 @@ export function GalleryPage({ onBackToMenu }: GalleryPageProps) {
 
   const lightboxLabel = useMemo(() => {
     if (activeIndex === null || !activeItem) return undefined;
-    return `${activeItem.alt || activeItem.filename} · ${activeIndex + 1}/${galleryItems.length}`;
+    return `${activeItem.filename} · ${activeIndex + 1}/${galleryItems.length}`;
   }, [activeIndex, activeItem]);
 
   const refreshTilesCache = useCallback(() => {
@@ -186,8 +179,8 @@ export function GalleryPage({ onBackToMenu }: GalleryPageProps) {
         return;
       }
 
-      const nearestIndex = findNearestTileIndex(clientX, clientY, tilesRef.current);
-      setHotTile(nearestIndex >= 0 ? nearestIndex : null);
+      // Avoid O(n) rect scans while panning across gaps — clear glow instead.
+      setHotTile(null);
     },
     [setHotTile]
   );
@@ -296,14 +289,9 @@ export function GalleryPage({ onBackToMenu }: GalleryPageProps) {
   }, [activeIndex, onBackToMenu]);
 
   const handleTileActivate = useCallback(
-    (displayIndex: number, sourceIndex: number) => {
-      const canHover = window.matchMedia("(hover: hover)").matches;
-
-      if (!canHover && hotIndexRef.current !== displayIndex) {
-        setHotTile(displayIndex);
-        return;
-      }
-
+    (displayIndex: number, sourceIndex: number, trigger: HTMLElement) => {
+      setHotTile(displayIndex);
+      lightboxReturnFocusRef.current = trigger;
       setActiveIndex(sourceIndex);
     },
     [setHotTile]
@@ -394,6 +382,63 @@ export function GalleryPage({ onBackToMenu }: GalleryPageProps) {
   }, []);
 
   useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      titleRef.current?.focus({ preventScroll: true });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
+
+  useEffect(() => {
+    if (activeIndex === null) return undefined;
+
+    const previouslyFocused =
+      lightboxReturnFocusRef.current ??
+      (document.activeElement instanceof HTMLElement ? document.activeElement : null);
+
+    const focusFrame = window.requestAnimationFrame(() => {
+      lightboxCloseRef.current?.focus();
+    });
+
+    const handleFocusTrap = (event: KeyboardEvent) => {
+      if (event.key !== "Tab") return;
+      const dialog = lightboxRef.current;
+      if (!dialog) return;
+
+      const focusable = Array.from(dialog.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
+        (element) => element.offsetParent !== null || element === document.activeElement
+      );
+      const first = focusable[0];
+      const last = focusable.at(-1);
+      if (!first || !last) {
+        event.preventDefault();
+        dialog.focus();
+        return;
+      }
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+        return;
+      }
+
+      if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleFocusTrap);
+
+    return () => {
+      window.cancelAnimationFrame(focusFrame);
+      document.removeEventListener("keydown", handleFocusTrap);
+      if (previouslyFocused?.isConnected) {
+        previouslyFocused.focus({ preventScroll: true });
+      }
+    };
+  }, [activeIndex]);
+
+  useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         event.preventDefault();
@@ -450,7 +495,7 @@ export function GalleryPage({ onBackToMenu }: GalleryPageProps) {
             transition={{ duration: 0.55, ease: fluidEase }}
             onPointerEnter={handleLockupPointerEnter}
           >
-            <h1 id="gallery-title" className="galleryLockupTitle">
+            <h1 id="gallery-title" className="galleryLockupTitle" tabIndex={-1} ref={titleRef}>
               GALERIA
             </h1>
             <p className="galleryLockupJp" lang="ja">
@@ -463,7 +508,7 @@ export function GalleryPage({ onBackToMenu }: GalleryPageProps) {
           {galleryDisplayItems.length > 0 ? (
             <div
               className="galleryRevealGrid"
-              aria-label="Fotos de galeria"
+              aria-label="Mosaico de fotos de la galería"
               ref={gridRef}
               onPointerMove={handleGridPointerMove}
               onPointerLeave={handleGridPointerLeave}
@@ -480,13 +525,17 @@ export function GalleryPage({ onBackToMenu }: GalleryPageProps) {
                   key={`${item.id}-${displayIndex}`}
                   data-gallery-tile=""
                   data-tile-index={displayIndex}
-                  onClick={() => handleTileActivate(displayIndex, sourceIndex)}
+                  tabIndex={-1}
+                  aria-label={`Abrir foto ${sourceIndex + 1}`}
+                  onClick={(event) =>
+                    handleTileActivate(displayIndex, sourceIndex, event.currentTarget)
+                  }
                   onFocus={() => setHotTile(displayIndex)}
                 >
                   <img
                     className="galleryRevealThumb"
                     src={item.thumbSrc}
-                    alt={item.alt || item.filename}
+                    alt=""
                     width={item.width}
                     height={item.height}
                     draggable="false"
@@ -498,15 +547,28 @@ export function GalleryPage({ onBackToMenu }: GalleryPageProps) {
             </div>
           ) : (
             <div className="galleryEmpty" role="status">
-              <p className="galleryEmptyCode">!PORTFOLIO</p>
-              <p>agregá fotos a la carpeta y corré `npm run gallery:sync`.</p>
+              {import.meta.env.DEV ? (
+                <>
+                  <p className="galleryEmptyCode">!PORTFOLIO</p>
+                  <p>agregá fotos a la carpeta y corré `npm run gallery:sync`.</p>
+                </>
+              ) : (
+                <p>próximamente</p>
+              )}
             </div>
           )}
         </div>
       </section>
 
       {activeItem ? (
-        <div className="galleryLightbox" role="dialog" aria-modal="true" aria-label={lightboxLabel}>
+        <div
+          className="galleryLightbox"
+          role="dialog"
+          aria-modal="true"
+          aria-label={lightboxLabel}
+          tabIndex={-1}
+          ref={lightboxRef}
+        >
           <button
             className="galleryLightboxScrim"
             type="button"
@@ -527,7 +589,13 @@ export function GalleryPage({ onBackToMenu }: GalleryPageProps) {
               <span>{activeItem.filename}</span>
             </figcaption>
           </figure>
-          <button className="galleryLightboxClose" type="button" onClick={() => setActiveIndex(null)}>
+          <button
+            className="galleryLightboxClose"
+            type="button"
+            aria-label="Cerrar"
+            ref={lightboxCloseRef}
+            onClick={() => setActiveIndex(null)}
+          >
             x
           </button>
           {galleryItems.length > 1 ? (

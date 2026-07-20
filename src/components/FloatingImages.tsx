@@ -208,7 +208,7 @@ export function FloatingImages({ activeId }: FloatingImagesProps) {
                   src={item.src}
                   alt=""
                   draggable="false"
-                  loading={idx === 0 ? "eager" : "lazy"}
+                  loading="lazy"
                 />
               </div>
             </div>

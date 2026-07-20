@@ -13,6 +13,7 @@ Portfolio SPA (React 19 + TypeScript + Vite). Production build uses **Rollup**, 
 ## Architecture
 
 - **Views** live in `src/data/sectionViews.ts` (`sectionEnterActions` + `AppView`). Add a page by registering the section action and handling the view in `App.tsx` (exhaustive `switch`).
+- **Hash routing** (`src/routing/appHashRoute.ts`): `#/`, `#/menu/:sectionId`, `#/galeria`, `#/proyectos`, etc. Keeps GH Pages simple (no `404.html` SPA fallback). Browser Back returns to menu/home.
 - **Menu** (`MenuOverlay`) only calls `onEnterSection`; it does not special-case destinations.
 - **Page chrome** (header, Escape, Lenis, motion) → `PortfolioPageShell` (projects / section stubs). Gallery uses a custom reveal layout in `GalleryPage`.
 - **Motion presets** → `src/motion/presets.ts` (Motion for view/page chrome).
@@ -29,4 +30,4 @@ Portfolio SPA (React 19 + TypeScript + Vite). Production build uses **Rollup**, 
 
 ## Design source of truth
 
-Runtime tokens/fonts: `src/styles/tokens.css` + `index.html` (Bebas Neue + Share Tech Mono). Keep `DESIGN.md` and `docs/brand-spec.md` aligned with those.
+Runtime tokens/fonts: `src/styles/tokens.css` + self-hosted Bebas Neue / Share Tech Mono (`src/styles/fonts.css`, `public/assets/fonts/`). Keep `DESIGN.md` and `docs/brand-spec.md` aligned with those.
