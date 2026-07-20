@@ -4,13 +4,12 @@ export const visualAssets = {
   menuPhotoBlock: "assets/menu-photo-block.webp"
 } as const;
 
-/** Fotos dispersas del menú cuando la sección activa es `home` (etiqueta = nombre de archivo sin extensión). */
+/** Fotos del menú home — pinout a la derecha (label = silkscreen). */
 export const homeMenuScatterPhotos = [
   {
     src: "assets/home1.webp",
     label: "img:01",
     slot: "one",
-    captionSide: "start",
     width: 2667,
     height: 4000
   },
@@ -18,7 +17,6 @@ export const homeMenuScatterPhotos = [
     src: "assets/home2.webp",
     label: "img:02",
     slot: "two",
-    captionSide: "end",
     width: 6000,
     height: 4000
   },
@@ -26,7 +24,6 @@ export const homeMenuScatterPhotos = [
     src: "assets/home3.webp",
     label: "img:03",
     slot: "three",
-    captionSide: "start",
     width: 4713,
     height: 3142
   }

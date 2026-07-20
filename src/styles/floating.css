@@ -47,16 +47,23 @@
   object-position: 100% 100%;
 }
 
+/* Right-stage pinout: flex column — equal vertical shares, never overlap. */
 .homeScatter {
+  --scatter-gap: clamp(14px, 2.2vh, 28px);
+  --scatter-bus-inset: clamp(22px, 3vw, 44px);
+  --wire-stroke: 1.5;
   position: absolute;
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: clamp(400px, 46%, 560px);
   box-sizing: border-box;
-  padding: clamp(70px, 9vh, 108px) clamp(34px, 5vw, 82px) clamp(44px, 7vh, 94px) clamp(500px, 46vw, 820px);
-  display: grid;
-  grid-template-columns: repeat(10, minmax(0, 1fr));
-  grid-template-rows: repeat(14, minmax(0, 1fr));
-  align-items: start;
-  justify-items: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: stretch;
+  gap: var(--scatter-gap);
+  padding: clamp(64px, 8vh, 100px) clamp(24px, 2.8vw, 48px) clamp(36px, 5vh, 64px) var(--scatter-bus-inset);
   pointer-events: none;
 }
 
@@ -64,40 +71,27 @@
   position: relative;
   z-index: 1;
   margin: 0;
-  max-width: 100%;
-  display: grid;
-  align-items: start;
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
   width: max-content;
-  column-gap: clamp(12px, 1.6vw, 20px);
+  max-width: 100%;
   pointer-events: auto;
-}
-
-.homeScatterFigure[data-caption-side="start"] {
-  grid-template-columns: auto auto;
-}
-
-.homeScatterFigure[data-caption-side="start"] .homeScatterLabel {
-  justify-self: end;
-  text-align: right;
-}
-
-.homeScatterFigure[data-caption-side="end"] {
-  grid-template-columns: auto auto;
-}
-
-.homeScatterFigure[data-caption-side="end"] .homeScatterLabel {
-  text-align: left;
 }
 
 .homeScatterLabel {
   margin: 0;
-  padding-top: 3px;
+  flex: 0 0 auto;
+  padding-left: 1px;
   font-family: var(--font-mono);
   font-size: clamp(9px, 0.78vw, 11px);
   font-weight: 700;
   font-style: italic;
   letter-spacing: 0.1em;
-  line-height: 1.15;
+  line-height: 1;
   color: oklch(72% 0.02 95 / 0.62);
   text-transform: lowercase;
   white-space: nowrap;
@@ -105,11 +99,24 @@
 
 .homeScatterFrame {
   position: relative;
+  box-sizing: border-box;
   min-width: 0;
-  overflow: hidden;
+  width: calc(var(--frame-w, 160px) * var(--scatter-fit, 1));
+  max-width: 100%;
+  height: auto;
+  max-height: 100%;
+  /* Port hangs on the left edge */
+  overflow: visible;
   border: 1px solid oklch(100% 0 0 / 0.22);
   background: oklch(0% 0 0 / 0.4);
   box-shadow: 0 18px 40px oklch(0% 0 0 / 0.35);
+}
+
+.homeScatterMedia {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 
 .homeScatterImg {
@@ -131,40 +138,23 @@
   border-color: rgb(var(--accent-rgb) / 0.85);
 }
 
+/* Cascade stagger (right-aligned column with different insets) */
 .homeScatterFigure--one {
-  grid-column: 7 / -1;
-  grid-row: 1 / 5;
-  justify-self: end;
-  align-self: start;
-  margin-top: clamp(0px, 0.8vh, 8px);
-}
-
-.homeScatterFigure--one .homeScatterFrame {
-  width: clamp(118px, 10vw, 168px);
+  align-self: flex-end;
+  margin-right: 0;
+  --frame-w: clamp(96px, 8.5vw, 140px);
 }
 
 .homeScatterFigure--two {
-  grid-column: 4 / -1;
-  grid-row: 6 / 10;
-  justify-self: end;
-  align-self: center;
-  margin-right: clamp(28px, 5vw, 82px);
-}
-
-.homeScatterFigure--two .homeScatterFrame {
-  width: clamp(240px, 26vw, 390px);
+  align-self: flex-end;
+  margin-right: clamp(28px, 5vw, 80px);
+  --frame-w: clamp(168px, 17vw, 280px);
 }
 
 .homeScatterFigure--three {
-  grid-column: 1 / 6;
-  grid-row: 11 / -1;
-  justify-self: start;
-  align-self: end;
-  margin-left: clamp(12px, 2.2vw, 38px);
-}
-
-.homeScatterFigure--three .homeScatterFrame {
-  width: clamp(190px, 20vw, 300px);
+  align-self: flex-end;
+  margin-right: clamp(10px, 1.8vw, 32px);
+  --frame-w: clamp(140px, 14vw, 230px);
 }
 
 .floatingImages[data-active-image-set="proyectos"] .floatingImageStrip {

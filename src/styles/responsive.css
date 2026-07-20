@@ -110,17 +110,11 @@
   }
 
   .homeScatter {
-    padding: clamp(4px, 1vh, 10px) clamp(8px, 2.5vw, 18px) clamp(14px, 3vh, 30px);
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    grid-template-rows: repeat(10, minmax(0, 1fr));
-  }
-
-  .homeScatterFigure[data-caption-side="start"] {
-    grid-template-columns: auto auto;
-  }
-
-  .homeScatterFigure[data-caption-side="end"] {
-    grid-template-columns: auto auto;
+    --scatter-gap: clamp(8px, 1.6vh, 16px);
+    --scatter-bus-inset: clamp(14px, 4vw, 28px);
+    --wire-stroke: 1.5;
+    left: 0;
+    padding: clamp(8px, 1.5vh, 16px) clamp(10px, 3vw, 18px) clamp(14px, 3vh, 28px) var(--scatter-bus-inset);
   }
 
   .homeScatterLabel {
@@ -128,39 +122,23 @@
     letter-spacing: 0.08em;
   }
 
-  .homeScatterFigure--one {
-    grid-column: 4 / -1;
-    grid-row: 1 / 3;
-    justify-self: end;
-    margin-top: 0;
+  .homeScatterFigure {
+    gap: 4px;
   }
 
-  .homeScatterFigure--one .homeScatterFrame {
-    width: clamp(76px, 18vw, 108px);
+  .homeScatterFigure--one {
+    margin-right: 2px;
+    --frame-w: clamp(64px, 15vw, 96px);
   }
 
   .homeScatterFigure--two {
-    grid-column: 2 / -1;
-    grid-row: 6 / 8;
-    justify-self: end;
-    align-self: center;
-    margin-right: 0;
-  }
-
-  .homeScatterFigure--two .homeScatterFrame {
-    width: clamp(136px, 30vw, 220px);
+    margin-right: clamp(16px, 5vw, 40px);
+    --frame-w: clamp(110px, 28vw, 180px);
   }
 
   .homeScatterFigure--three {
-    grid-column: 1 / 4;
-    grid-row: 8 / -1;
-    justify-self: start;
-    align-self: end;
-    margin-left: 0;
-  }
-
-  .homeScatterFigure--three .homeScatterFrame {
-    width: clamp(116px, 28vw, 170px);
+    margin-right: clamp(6px, 2vw, 18px);
+    --frame-w: clamp(96px, 24vw, 148px);
   }
 
   .floatingImages[data-active-image-set="proyectos"] .floatingImageStrip {
@@ -472,30 +450,32 @@
   }
 
   .homeScatter {
-    padding-inline: 6px 18px;
+    --scatter-gap: clamp(6px, 1.2vh, 12px);
+    --scatter-bus-inset: 12px;
   }
 
-  .homeScatterFigure--one .homeScatterFrame {
-    width: clamp(70px, 16vw, 84px);
+  .homeScatterFigure--one {
+    --frame-w: clamp(56px, 14vw, 80px);
   }
 
-  .homeScatterFigure--two .homeScatterFrame {
-    width: clamp(112px, 26vw, 136px);
+  .homeScatterFigure--two {
+    margin-right: clamp(12px, 4vw, 28px);
+    --frame-w: clamp(96px, 24vw, 132px);
   }
 
-  .homeScatterFigure--three .homeScatterFrame {
-    width: clamp(96px, 22vw, 112px);
+  .homeScatterFigure--three {
+    --frame-w: clamp(84px, 20vw, 112px);
   }
 }
 
 @media (max-width: 520px) and (max-height: 700px) {
   .floatingImages[data-active-image-set="home"] {
-    top: 60%;
+    top: 58%;
   }
 
   .homeScatter {
-    transform: scale(0.82);
-    transform-origin: top right;
+    --scatter-gap: 6px;
+    padding-top: 6px;
   }
 }
 
@@ -520,7 +500,7 @@
   }
 }
 
-/* ─── Home scatter: wires bajo fotos (layout en grid más arriba) ─ */
+/* ─── Home scatter: full-edge bus → stubs → ports ─ */
 
 .homeScatterRoot {
   left: 0 !important;
@@ -539,11 +519,17 @@
 }
 
 .homeScatterWire {
-  stroke: rgb(var(--accent-rgb) / 0.55);
-  stroke-width: 2px;
-  vector-effect: non-scaling-stroke;
+  stroke: rgb(var(--accent-rgb) / 0.78);
+  /* width set as SVG attribute so every segment matches exactly */
+  stroke-linecap: square;
+  stroke-linejoin: miter;
   shape-rendering: geometricPrecision;
   fill: none;
+}
+
+.homeScatterJunction {
+  fill: var(--accent);
+  stroke: none;
 }
 
 .homeScatterRoot .homeScatterFigure:hover {
@@ -554,31 +540,24 @@
   background: var(--accent);
 }
 
+/* Port sits centered on the frame's left border — wire terminates at its center */
 .homeScatterPort {
   position: absolute;
-  width: 7px;
-  height: 7px;
+  left: 0;
+  top: 50%;
+  width: 8px;
+  height: 8px;
   border: 1.5px solid var(--accent);
   background: var(--bg);
+  transform: translate(-50%, -50%);
   z-index: 2;
+  pointer-events: none;
   transition: background-color 150ms ease;
-}
-
-.homeScatterPort--ml {
-  left: -4px;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-@media (max-width: 820px) {
-  .homeScatterWire {
-    stroke-width: 1.5px;
-  }
 }
 
 @media (max-width: 520px) {
   .homeScatterPort {
-    width: 6px;
-    height: 6px;
+    width: 7px;
+    height: 7px;
   }
 }

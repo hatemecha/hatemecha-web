@@ -1,91 +1,182 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import type { PortfolioSectionId } from "../data/portfolioSections";
 import { homeMenuScatterPhotos, visualAssets } from "../data/assets";
 import { requirePhotoAspectRatio } from "../utils/aspectRatio";
 
 type FloatingImagesProps = { activeId: PortfolioSectionId };
 
-type Rect = { x: number; y: number; w: number; h: number };
+type Pt = { x: number; y: number };
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
 }
 
-function getConnectionY(rect: Rect) {
-  return Math.round(rect.y + rect.h / 2);
+function clearSvg(svg: SVGSVGElement) {
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
 }
 
-function getFrameRect(frame: HTMLElement, containerRect: DOMRect): Rect {
-  const frameRect = frame.getBoundingClientRect();
-
-  return {
-    x: frameRect.left - containerRect.left,
-    y: frameRect.top - containerRect.top,
-    w: frameRect.width,
-    h: frameRect.height
-  };
+function appendPath(svg: SVGSVGElement, d: string, strokeWidth: number) {
+  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  path.setAttribute("class", "homeScatterWire");
+  path.setAttribute("d", d);
+  path.setAttribute("stroke-width", String(strokeWidth));
+  svg.appendChild(path);
 }
 
-function buildWirePaths(rects: Rect[], stageW: number, stageH: number): string[] {
-  if (rects.length === 0) return [];
+function appendJunction(svg: SVGSVGElement, x: number, y: number, size: number) {
+  const half = size / 2;
+  const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+  rect.setAttribute("class", "homeScatterJunction");
+  rect.setAttribute("x", String(x - half));
+  rect.setAttribute("y", String(y - half));
+  rect.setAttribute("width", String(size));
+  rect.setAttribute("height", String(size));
+  svg.appendChild(rect);
+}
 
-  const sortedRects = rects.slice().sort((a, b) => a.y + a.h / 2 - (b.y + b.h / 2));
-  const leftMostFrame = Math.min(...sortedRects.map((rect) => rect.x));
-  const spineGap = clamp(stageW * 0.025, 18, 34);
-  const safeLeft = stageW > 760 ? clamp(stageW * 0.5, 0, stageW - 10) : 10;
-  const spineX = Math.round(clamp(leftMostFrame - spineGap, safeLeft, stageW - 10));
-  const topY = 0;
-  const bottomY = Math.round(stageH);
+/** Shrink frames uniformly so every photo fits its flex slot (no overlap). */
+function fitScatterFrames(container: HTMLElement) {
+  container.style.setProperty("--scatter-fit", "1");
+  void container.offsetHeight;
 
-  const paths = [`M ${spineX} ${topY} V ${bottomY}`];
+  const figures = Array.from(container.querySelectorAll<HTMLElement>(".homeScatterFigure"));
+  let fit = 1;
 
-  sortedRects.forEach((rect) => {
-    const targetX = Math.round(rect.x);
-    const targetY = getConnectionY(rect);
-    paths.push(`M ${spineX} ${targetY} H ${targetX}`);
+  figures.forEach((figure) => {
+    const frame = figure.querySelector<HTMLElement>(".homeScatterFrame");
+    const label = figure.querySelector<HTMLElement>(".homeScatterLabel");
+    if (!frame) return;
+
+    const gap = 6;
+    const avail = figure.clientHeight - (label?.offsetHeight ?? 0) - gap;
+    const needed = frame.offsetHeight;
+    if (needed > avail && needed > 0 && avail > 0) {
+      fit = Math.min(fit, avail / needed);
+    }
   });
 
-  return paths;
+  container.style.setProperty("--scatter-fit", String(clamp(fit, 0.42, 1)));
+  void container.offsetHeight;
+}
+
+/**
+ * Measure ports in the SVG's own screen space, lock viewBox 1:1 to that box,
+ * then draw edge→edge spine + stubs into each port center.
+ */
+function paintWires(svg: SVGSVGElement, container: HTMLElement) {
+  fitScatterFrames(container);
+
+  const svgRect = svg.getBoundingClientRect();
+  const stageW = svgRect.width;
+  const stageH = svgRect.height;
+
+  if (stageW <= 0 || stageH <= 0) {
+    clearSvg(svg);
+    return;
+  }
+
+  svg.setAttribute("viewBox", `0 0 ${stageW} ${stageH}`);
+
+  const ports: Pt[] = Array.from(container.querySelectorAll<HTMLElement>(".homeScatterPort")).map((port) => {
+    const r = port.getBoundingClientRect();
+    return {
+      x: r.left + r.width / 2 - svgRect.left,
+      y: r.top + r.height / 2 - svgRect.top
+    };
+  });
+
+  clearSvg(svg);
+  if (ports.length === 0) return;
+
+  const strokeWidth = Number.parseFloat(getComputedStyle(container).getPropertyValue("--wire-stroke")) || 1.5;
+  const junctionSize = strokeWidth + 3.5;
+
+  const sorted = ports.slice().sort((a, b) => a.y - b.y);
+  const leftMost = Math.min(...sorted.map((p) => p.x));
+  const spineGap = clamp(stageW * 0.022, 18, 32);
+  const spineX = clamp(leftMost - spineGap, 8, stageW - 8);
+
+  appendPath(svg, `M ${spineX} 0 V ${stageH}`, strokeWidth);
+
+  sorted.forEach((port) => {
+    appendPath(svg, `M ${spineX} ${port.y} H ${port.x}`, strokeWidth);
+    appendJunction(svg, spineX, port.y, junctionSize);
+  });
 }
 
 function WireSvg({ watch }: { watch: unknown }) {
   const svgRef = useRef<SVGSVGElement>(null);
-  const [paths, setPaths] = useState<string[]>([]);
 
   useEffect(() => {
     const svg = svgRef.current;
     if (!svg) return;
     const container = svg.closest<HTMLElement>(".homeScatter");
     if (!container) return;
+    const menu = container.closest<HTMLElement>(".fullscreenMenu");
 
-    const run = () => {
-      const frames = Array.from(container.querySelectorAll<HTMLElement>(".homeScatterFrame"));
-      if (frames.length === 0) {
-        setPaths([]);
-        return;
+    let raf = 0;
+    const timers: number[] = [];
+
+    const paint = () => paintWires(svg, container);
+
+    const clearTimers = () => {
+      while (timers.length) {
+        const id = timers.pop();
+        if (id !== undefined) window.clearTimeout(id);
       }
-      const cRect = container.getBoundingClientRect();
-      const rects: Rect[] = frames.map((frame) => getFrameRect(frame, cRect));
-      setPaths(buildWirePaths(rects, cRect.width, cRect.height));
     };
 
-    const observer = new ResizeObserver(run);
+    const schedule = () => {
+      cancelAnimationFrame(raf);
+      clearTimers();
+      raf = requestAnimationFrame(() => {
+        paint();
+        // Menu open uses transform scale; getBoundingClientRect is wrong until it settles.
+        for (const ms of [50, 200, 700, 1100]) {
+          timers.push(window.setTimeout(paint, ms));
+        }
+      });
+    };
+
+    const observer = new ResizeObserver(schedule);
     observer.observe(container);
-    container.querySelectorAll<HTMLElement>(".homeScatterFrame").forEach((frame) => observer.observe(frame));
-    const frameId = window.requestAnimationFrame(run);
+    observer.observe(svg);
+    container.querySelectorAll<HTMLElement>(".homeScatterFrame, .homeScatterPort, .homeScatterFigure").forEach((el) => {
+      observer.observe(el);
+    });
+
+    schedule();
+
+    const onLoad = () => schedule();
+    container.querySelectorAll("img").forEach((img) => {
+      if (!img.complete) img.addEventListener("load", onLoad);
+    });
+
+    const onTransitionEnd = (event: TransitionEvent) => {
+      if (event.target === menu) schedule();
+    };
+
+    window.addEventListener("resize", schedule);
+    menu?.addEventListener("transitionend", onTransitionEnd);
 
     return () => {
-      window.cancelAnimationFrame(frameId);
+      cancelAnimationFrame(raf);
+      clearTimers();
       observer.disconnect();
+      window.removeEventListener("resize", schedule);
+      menu?.removeEventListener("transitionend", onTransitionEnd);
+      container.querySelectorAll("img").forEach((img) => img.removeEventListener("load", onLoad));
     };
   }, [watch]);
 
   return (
-    <svg ref={svgRef} className="homeScatterWires" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-      {paths.map((d) => (
-        <path key={d} className="homeScatterWire" d={d} />
-      ))}
-    </svg>
+    <svg
+      ref={svgRef}
+      className="homeScatterWires"
+      aria-hidden="true"
+      xmlns="http://www.w3.org/2000/svg"
+      preserveAspectRatio="none"
+    />
   );
 }
 
@@ -107,28 +198,20 @@ export function FloatingImages({ activeId }: FloatingImagesProps) {
         <WireSvg watch={activeId} />
 
         {homeMenuScatterPhotos.map((item, idx) => (
-          <figure
-            key={item.src}
-            className={`homeScatterFigure homeScatterFigure--${item.slot}`}
-            data-caption-side={item.captionSide}
-          >
-            {item.captionSide === "start" ? (
-              <>
-                <figcaption className="homeScatterLabel">{item.label}</figcaption>
-                <div className="homeScatterFrame" style={{ aspectRatio: requirePhotoAspectRatio(item.width, item.height) }}>
-                  <img className="homeScatterImg" src={item.src} alt="" draggable="false" loading={idx === 0 ? "eager" : "lazy"} />
-                  <span className="homeScatterPort homeScatterPort--ml" aria-hidden="true" />
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="homeScatterFrame" style={{ aspectRatio: requirePhotoAspectRatio(item.width, item.height) }}>
-                  <img className="homeScatterImg" src={item.src} alt="" draggable="false" loading={idx === 0 ? "eager" : "lazy"} />
-                  <span className="homeScatterPort homeScatterPort--ml" aria-hidden="true" />
-                </div>
-                <figcaption className="homeScatterLabel">{item.label}</figcaption>
-              </>
-            )}
+          <figure key={item.src} className={`homeScatterFigure homeScatterFigure--${item.slot}`}>
+            <figcaption className="homeScatterLabel">{item.label}</figcaption>
+            <div className="homeScatterFrame" style={{ aspectRatio: requirePhotoAspectRatio(item.width, item.height) }}>
+              <span className="homeScatterPort" aria-hidden="true" />
+              <div className="homeScatterMedia">
+                <img
+                  className="homeScatterImg"
+                  src={item.src}
+                  alt=""
+                  draggable="false"
+                  loading={idx === 0 ? "eager" : "lazy"}
+                />
+              </div>
+            </div>
           </figure>
         ))}
       </div>
